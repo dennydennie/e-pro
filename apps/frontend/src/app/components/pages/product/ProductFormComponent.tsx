@@ -7,6 +7,7 @@ import validator from '@rjsf/validator-ajv8';
 import { Product } from "@/app/types/product";
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
+import { useRouter } from "next/navigation";
 
 interface ProductFormProps {
     initialData?: Product;
@@ -43,8 +44,8 @@ const uiSchema = {
     },
     expiryDate: {
         "ui:widget": "date"
-    },    id: {
-        "ui:widget": "hidden" 
+    }, id: {
+        "ui:widget": "hidden"
     }
 };
 
@@ -52,6 +53,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
+    const router = useRouter();
 
     if (!!initialData) {
         productSchema.properties.id.default = initialData?.id as string;
@@ -68,18 +70,32 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
         try {
             let response;
 
-            if (!!formData.id) {
-                response = await makeRequest<Product>('PUT', `/product/${formData.id}`, formData);
-                const success = "The operation was successful!";
-                setMessageType('success');
-                setMessage(success);
-                setIsMessageModalOpen(true);
+            if (formData.id !== '') {
+                response = await makeRequest<Product>('PATCH', `/product/${formData.id}`, formData);
+                if (response.status === 200) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             } else {
-                response = await makeRequest<Product>('POST', '/product', formData);
-                const error = "Something went wrong!";
-                setMessageType('error');
-                setMessage(error);
-                setIsMessageModalOpen(true);
+                response = await makeRequest<Product>('POST', '/product', { ...formData, id: undefined });
+                if (response.status === 201) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             }
 
         } catch (error) {
@@ -105,7 +121,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}
-                onClose={() => setIsMessageModalOpen(false)}
+                onClose={() => {
+                    setIsMessageModalOpen(false);
+                    router.push('/product')
+                }}
                 message={message}
                 type={messageType}
             />

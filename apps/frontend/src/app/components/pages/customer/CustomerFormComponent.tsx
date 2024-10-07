@@ -55,7 +55,6 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ initialData }) => {
 
             if (!!formData.id && formData.id !== "") {
                 response = await makeRequest<Customer>('PATCH', `/customer/${formData.id}`, formData);
-                console.log(response);
                 if (response.status === 200) {
                     const success = "The operation was successful!";
                     setMessageType('success');
@@ -82,7 +81,6 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ initialData }) => {
                     setIsMessageModalOpen(true);
                 }
             }
-            console.log('formData', response);
 
         } catch (error) {
             console.error('Error occurred while processing the form:', error);

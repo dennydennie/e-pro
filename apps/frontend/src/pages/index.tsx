@@ -26,6 +26,7 @@ const Dashboard = () => {
         { name: "Orders", endPoint: '/order' },
         { name: "Stocks", endPoint: '/stock' },
         { name: "Customers", endPoint: '/customer' },
+        { name: "Products", endPoint: '/product' },
     ];
 
     const displayItems = user?.role === 'admin' ?items : ordinaryUserItems ;

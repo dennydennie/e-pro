@@ -36,7 +36,7 @@ function ProductDetailViewComponent({ productId }: {productId: string}) {
     React.useEffect(() => {
         const fetchProduct = async () => {
             try {
-                const data: Product = await makeRequest<Product>('GET', `/product/${productId}`);
+                const data: Product = (await makeRequest<Product>('GET', `/product/${productId}`)).data;
                 setProduct(data);
             } catch (err) {
                 console.error('Error fetching product:', err);

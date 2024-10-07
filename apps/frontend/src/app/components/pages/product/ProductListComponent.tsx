@@ -71,7 +71,7 @@ function ProductListComponent() {
     React.useEffect(() => {
         const getProducts = async () => {
             try {
-                const products: Product[] = await makeRequest<Product[]>('GET', '/product'); 
+                const products: Product[] = (await makeRequest<Product[]>('GET', '/product')).data; 
                 setData(products);
             } catch (error) {
                 console.warn('Error fetching products:', error);
@@ -81,11 +81,11 @@ function ProductListComponent() {
     }, []);
 
     const handleCreate = () => {
-        router.push('products/add');
+        router.push('product/add');
     };
 
     const handleRowClick = (id: string) => {
-        router.push(`products/edit/${id}`);
+        router.push(`product/edit/${id}`);
     };
 
     return (

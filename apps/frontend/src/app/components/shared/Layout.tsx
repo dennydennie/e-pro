@@ -41,6 +41,7 @@ const Navbar = () => {
         { title: 'Customers', basePath: '/customer', icon: FaUsers },
         { title: 'Orders', basePath: '/order', icon: FaShoppingCart },
         { title: 'Stocks', basePath: '/stock', icon: FaClipboardList },
+        { title: 'Products', basePath: '/product', icon: FaBox },
         { title: 'Profile', basePath: '/user', icon: FaUser },
     ];
 

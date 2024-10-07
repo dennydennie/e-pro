@@ -17,7 +17,7 @@ export default function EditProduct() {
         const fetchProduct = async () => {
             if (productId) {
                 try {
-                    const data: Product = await makeRequest<Product>('GET', `/product/${productId}`);
+                    const data: Product = (await makeRequest<Product>('GET', `/product/${productId}`)).data;
                     setInitialData(data);
                 } catch (error) {
                     console.error('Error fetching product:', error);

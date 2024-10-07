@@ -9,7 +9,7 @@ export const productSchema = {
         mass: { type: "number", title: "Mass (optional)" },
         volume: { type: "number", title: "Volume (optional)" },
         dimensions: { type: "string", title: "Dimensions" },
-        expiryDate: { type: "string", title: "Expiry Date", format: "date-time" },
+        expiryDate: { type: "string", title: "Expiry Date", format: "date" },
     },
     required: ["name", "description", "price", "unit", "dimensions", "expiryDate"],
 };
