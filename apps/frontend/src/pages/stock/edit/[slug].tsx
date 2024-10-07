@@ -17,7 +17,7 @@ export default function EditStock() {
         const fetchStock = async () => {
             if (stockId) {
                 try {
-                    const data: Stock = await makeRequest<Stock>('GET', `/stock/${stockId}`);
+                    const data: Stock = (await makeRequest<Stock>('GET', `/stock/${stockId}`)).data;
                     setInitialData(data);
                 } catch (error) {
                     console.error('Error fetching stock:', error);

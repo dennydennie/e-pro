@@ -36,7 +36,7 @@ function UserDetailViewComponent({ userId }: { userId: string }) {
     React.useEffect(() => {
         const fetchUser = async () => {
             try {
-                const data: User = await makeRequest<User>('GET', `/user/${userId}`);
+                const data: User = (await makeRequest<User>('GET', `/user/${userId}`)).data;
                 setUser(data);
             } catch (err) {
                 console.error('Error fetching user:', err);

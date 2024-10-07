@@ -17,7 +17,7 @@ export default function EditStockThreshold() {
         const fetchStockThreshold = async () => {
             if (stockThresholdId) {
                 try {
-                    const data: StockThreshold = await makeRequest<StockThreshold>('GET', `/stock-threshold/${stockThresholdId}`);
+                    const data: StockThreshold = (await makeRequest<StockThreshold>('GET', `/stock-threshold/${stockThresholdId}`)).data;
                     setInitialData(data);
                 } catch (error) {
                     console.error('Error fetching stock threshold:', error);

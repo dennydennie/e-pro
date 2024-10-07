@@ -14,7 +14,7 @@ import {
 } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import makeRequest from '@/app/services/backend';
-import { Order } from '@/app/types/order'; // Adjust the import path accordingly
+import { Order } from '@/app/types/order';
 
 
 const theme = extendTheme({
@@ -36,7 +36,7 @@ function OrderDetailViewComponent({ orderId }:{orderId: string}) {
     React.useEffect(() => {
         const fetchOrder = async () => {
             try {
-                const data: Order = await makeRequest<Order>('GET', `/order/${orderId}`);
+                const data: Order = (await makeRequest<Order>('GET', `/order/${orderId}`)).data;
                 setOrder(data);
             } catch (err) {
                 console.error('Error fetching order:', err);

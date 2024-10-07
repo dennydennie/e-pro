@@ -53,7 +53,7 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ initialData }) => {
         try {
             let response;
 
-            if (!!formData.id && formData.id !== "") {
+            if (formData.id !== "") {
                 response = await makeRequest<Customer>('PATCH', `/customer/${formData.id}`, formData);
                 if (response.status === 200) {
                     const success = "The operation was successful!";

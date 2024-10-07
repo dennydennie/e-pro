@@ -36,7 +36,7 @@ function WarehouseDetailViewComponent({ warehouseId }: { warehouseId: string }) 
     React.useEffect(() => {
         const fetchWarehouse = async () => {
             try {
-                const data: Warehouse = await makeRequest<Warehouse>('GET', `/warehouse/${warehouseId}`);
+                const data: Warehouse = (await makeRequest<Warehouse>('GET', `/warehouse/${warehouseId}`)).data;
                 setWarehouse(data);
             } catch (err) {
                 console.error('Error fetching warehouse:', err);

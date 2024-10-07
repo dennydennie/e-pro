@@ -54,7 +54,7 @@ function StockThresholdListComponent() {
     React.useEffect(() => {
         const getStockThresholds = async () => {
             try {
-                const thresholds: StockThreshold[] = await makeRequest<StockThreshold[]>('GET', '/stock-thresholds'); 
+                const thresholds: StockThreshold[] = (await makeRequest<StockThreshold[]>('GET', '/stock-thresholds')).data; 
                 setData(thresholds);
             } catch (error) {
                 console.warn('Error fetching stock thresholds:', error);
@@ -65,11 +65,11 @@ function StockThresholdListComponent() {
     }, []);
 
     const handleCreate = () => {
-        router.push('stock-thresholds/add');
+        router.push('stock-threshold/add');
     };
 
     const handleRowClick = (id: string) => {
-        router.push(`stock-thresholds/edit/${id}`);
+        router.push(`stock-threshold/edit/${id}`);
     };
 
     return (
@@ -77,7 +77,7 @@ function StockThresholdListComponent() {
             <Box p={4}>
                 <Heading>Stock Thresholds</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} title={'Add Stock Threshold'} icon={FaPlus} action={handleCreate} />
+                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

@@ -93,7 +93,7 @@ function ProductListComponent() {
             <Box p={4}>
                 <Heading>Products</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} title={'Add Product'} icon={FaPlus} action={handleCreate} />
+                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

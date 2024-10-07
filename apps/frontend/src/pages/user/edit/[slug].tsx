@@ -17,7 +17,7 @@ export default function EditUser() {
         const fetchUser = async () => {
             if (userId) {
                 try {
-                    const data: User = await makeRequest<User>('GET', `/user/${userId}`);
+                    const data: User = (await makeRequest<User>('GET', `/user/${userId}`)).data;
                     setInitialData(data);
                 } catch (error) {
                     console.error('Error fetching user:', error);

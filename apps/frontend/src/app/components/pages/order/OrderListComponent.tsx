@@ -63,7 +63,7 @@ function OrderListComponent() {
     React.useEffect(() => {
         const getOrders = async () => {
             try {
-                const orders: Order[] = await makeRequest<Order[]>('GET', '/order'); 
+                const orders: Order[] = (await makeRequest<Order[]>('GET', '/order')).data; 
                 setData(orders);
             } catch (error) {
                 console.warn('Error fetching orders:', error);
@@ -85,7 +85,7 @@ function OrderListComponent() {
             <Box p={4}>
                 <Heading>Orders</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} title={'Add Order'} icon={FaPlus} action={handleCreate} />
+                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

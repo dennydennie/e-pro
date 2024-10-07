@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, HStack } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
 import { Order } from "@/app/types/order";
 import { orderSchema } from "./order-schema";
@@ -7,6 +7,7 @@ import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
+import { useRouter } from "next/router";
 
 interface OrderFormProps {
     initialData?: Order;
@@ -17,7 +18,7 @@ const uiSchema = {
         "ui:widget": "text"
     },
     id: {
-        "ui:widget": "hidden" 
+        "ui:widget": "hidden"
     },
     orderDate: {
         "ui:widget": "date"
@@ -49,9 +50,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
+    const router = useRouter();
 
     if (!!initialData) {
         orderSchema.properties.id.default = initialData?.id as string;
+    }
+
+    const handleCancel = () => {
+        router.push('/order');
     }
 
     const handleSubmit = async (data: IChangeEvent<Order>, event: React.FormEvent<HTMLFormElement>) => {
@@ -65,18 +71,33 @@ const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         try {
             let response;
 
-            if (!!formData.id) {
-                response = await makeRequest<Order>('PUT', `/order/${formData.id}`, formData);
+            if (formData.id !== "") {
+                response = await makeRequest<Order>('PATCH', `/order/${formData.id}`, formData);
                 const success = "The operation was successful!";
-                setMessageType('success');
-                setMessage(success);
-                setIsMessageModalOpen(true);
+                if (response.status === 200) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             } else {
-                response = await makeRequest<Order>('POST', '/order', formData);
-                const error = "Something went wrong!";
-                setMessageType('error');
-                setMessage(error);
-                setIsMessageModalOpen(true);
+                response = await makeRequest<Order>('POST', '/order', {...formData, id: undefined});
+                if (response.status === 201) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             }
 
         } catch (error) {
@@ -85,7 +106,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
     };
 
     return (
-        <Box width="100%">
+        <Box width="50%">
+            <Heading my={4}>Add Order</Heading>
             <Form
                 schema={orderSchema}
                 uiSchema={uiSchema}
@@ -94,11 +116,14 @@ const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
                 liveValidate
                 validator={validator}
             >
-                          <Box mt={4}>
-                    <Button type="submit" colorScheme="teal">
+                <HStack mt={4} spacing={8}>
+                    <Button type="submit" colorScheme="blue">
                         Submit
                     </Button>
-                </Box>
+                    <Button colorScheme="red" onClick={handleCancel} aria-label="Cancel action">
+                        Cancel
+                    </Button>
+                </HStack>
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}

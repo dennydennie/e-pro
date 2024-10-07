@@ -17,7 +17,7 @@ export default function EditFactory() {
         const fetchFactory = async () => {
             if (factoryId) {
                 try {
-                    const data: Factory = await makeRequest<Factory>('GET', `/factory/${factoryId}`);
+                    const data: Factory = (await makeRequest<Factory>('GET', `/factory/${factoryId}`)).data;
                     setInitialData(data);
                 } catch (error) {
                     console.error('Error fetching factory:', error);

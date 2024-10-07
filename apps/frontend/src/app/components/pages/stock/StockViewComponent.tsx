@@ -36,7 +36,7 @@ function StockDetailViewComponent({ stockId }: { stockId: string }) {
     React.useEffect(() => {
         const fetchStock = async () => {
             try {
-                const data: Stock = await makeRequest<Stock>('GET', `/stock/${stockId}`);
+                const data: Stock = (await makeRequest<Stock>('GET', `/stock/${stockId}`)).data;
                 setStock(data);
             } catch (err) {
                 console.error('Error fetching stock:', err);

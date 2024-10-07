@@ -36,7 +36,7 @@ function StockThresholdDetailViewComponent({ stockThresholdId }: {stockThreshold
     React.useEffect(() => {
         const fetchStockThreshold = async () => {
             try {
-                const data: StockThreshold = await makeRequest<StockThreshold>('GET', `/stock-threshold/${stockThresholdId}`);
+                const data: StockThreshold = (await makeRequest<StockThreshold>('GET', `/stock-threshold/${stockThresholdId}`)).data;
                 setStockThreshold(data);
             } catch (err) {
                 console.error('Error fetching stock threshold:', err);

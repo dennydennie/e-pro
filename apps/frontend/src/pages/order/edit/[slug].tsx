@@ -17,7 +17,7 @@ export default function EditOrder() {
         const fetchOrder = async () => {
             if (orderId) {
                 try {
-                    const data: Order = await makeRequest<Order>('GET', `/order/${orderId}`);
+                    const data: Order = (await makeRequest<Order>('GET', `/order/${orderId}`)).data;
                     setInitialData(data);
                 } catch (error) {
                     console.error('Error fetching order:', error);

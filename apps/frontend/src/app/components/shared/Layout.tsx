@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
-import { Box, Flex, Heading, Stack, Link, Icon } from '@chakra-ui/react';
+import { Box, Flex, Heading, Stack, Icon } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { FaPowerOff, FaUser,FaUsers, FaIndustry, FaWarehouse, FaBox, FaClipboardList, FaUserCog, FaChartBar, FaShoppingCart, FaUserTie } from 'react-icons/fa';
+import { FaPowerOff, FaUser, FaUsers, FaIndustry, FaWarehouse, FaBox, FaClipboardList, FaUserCog, FaChartBar, FaShoppingCart, FaUserTie } from 'react-icons/fa';
 import { signOut, useSession } from 'next-auth/react';
 import Loading from './Loading';
 import { User } from '@/app/types/user';
 import { CustomLinkType } from '@/app/types/custom-link';
+import Link from 'next/link';
 
 const Navbar = () => {
     const router = useRouter();
@@ -15,7 +16,7 @@ const Navbar = () => {
 
     useEffect(() => {
         const exemptRoutes = ['/auth/signin', '/auth/new-user'];
-    
+
         if (status === "unauthenticated" && !exemptRoutes.includes(router.pathname)) {
             router.push("/auth/signin");
         }
@@ -34,9 +35,9 @@ const Navbar = () => {
         { title: 'Users', basePath: '/user', icon: FaUserCog },
         { title: 'Stock Thresholds', basePath: '/stock-threshold', icon: FaChartBar },
         { title: 'Orders', basePath: '/order', icon: FaShoppingCart },
-        { title: 'Factory Staff', basePath: '/factory-staff', icon: FaUserTie },
+        { title: 'Factory Staff', basePath: '/staff', icon: FaUserTie },
     ];
-    
+
     const ordinaryUserLinks: CustomLinkType[] = [
         { title: 'Customers', basePath: '/customer', icon: FaUsers },
         { title: 'Orders', basePath: '/order', icon: FaShoppingCart },
@@ -47,29 +48,34 @@ const Navbar = () => {
 
     const userRole = user?.role;
     const userLinks = userRole === 'admin'
-    ? adminLinks 
-    : ordinaryUserLinks;
-    
-    
+        ? ordinaryUserLinks
+        : adminLinks;
+
+
     if (status === "loading") {
         return <Loading />;
     }
-        
+
     return (
-        <Flex as="nav" position="fixed" top="0" left="0" w="100%" bg="blue.600" p={4} zIndex="1000" boxShadow="md" alignItems="center">
+        <Flex as="nav" position="fixed" top="0" left="0" w="100%" bg="blue.600" p={6} zIndex="1000" boxShadow="md" alignItems="center">
             <Heading as="a" href="/" color="white" mr="auto">E PROcure</Heading>
-            <Stack direction="row" spacing={8}>
+            <Stack direction="row" spacing={4}>
                 {userLinks.map((link, index) => (
-                    <Link key={index} href={link.basePath} _hover={{ color: 'white' }}>
-                        <Flex alignItems="center" color={router.pathname.includes(link.basePath) ? 'white' : 'blue.200'}>
+                    <Link key={index} href={link.basePath} passHref>
+                        <Flex
+                            alignItems="center"
+                            color={router.pathname.includes(link.basePath) ? 'white' : 'blue.200'}
+                            _hover={{ color: 'white' }}
+                            as="a"
+                        >
                             <Icon
                                 as={link.icon}
                                 color={router.pathname.includes(link.basePath) ? 'white' : 'blue.200'}
                                 mr={2}
                             />
-                            <Box 
+                            <Box
                                 as="span"
-                                color={router.pathname.includes(link.basePath) ? 'white' : 'blue.200'} 
+                                color={router.pathname.includes(link.basePath) ? 'white' : 'blue.200'}
                                 fontWeight={router.pathname.includes(link.basePath) ? 'bold' : 'normal'}
                             >
                                 {link.title}
@@ -77,38 +83,44 @@ const Navbar = () => {
                         </Flex>
                     </Link>
                 ))}
-                <Link href="#" onClick={() => handleLogout()} _hover={{ color: 'red.300' }}>
-                    <Flex alignItems="center" color="white" _hover={{ color: 'red.300' }}>
+                <Link href="#" passHref>
+                    <Flex
+                        alignItems="center"
+                        color="white"
+                        _hover={{ color: 'red.300' }}
+                        as="a" // Use 'as' to render the Flex as a link
+                        onClick={() => handleLogout()}
+                    >
                         <Icon as={FaPowerOff} boxSize={5} mx={2} />
                     </Flex>
                 </Link>
             </Stack>
         </Flex>
     )
-    };
-    
-    const MainContent = ({ children }: any) => { 
-        return (
-            <Box 
-                mt="50px" 
-                p={8}
-                bg="blue.50" 
-                minHeight="100vh"
-            >
+};
+
+const MainContent = ({ children }: any) => {
+    return (
+        <Box
+            mt="70px"
+            p={8}
+            bg="blue.50"
+            minHeight="100vh"
+        >
+            {children}
+        </Box>
+    );
+};
+
+const Layout = ({ children }: any) => {
+    return (
+        <>
+            <Navbar />
+            <MainContent>
                 {children}
-            </Box>
-        );
-    };
-    
-    const Layout = ({ children }: any) => {
-        return (
-            <>
-                <Navbar />
-                <MainContent>
-                { children }
-                </MainContent>
-            </>
-        );
-    };
-    
+            </MainContent>
+        </>
+    );
+};
+
 export default Layout;

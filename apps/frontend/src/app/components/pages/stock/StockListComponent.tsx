@@ -50,7 +50,7 @@ function StockListComponent() {
     React.useEffect(() => {
         const getStocks = async () => {
             try {
-                const stocks: Stock[] = await makeRequest<Stock[]>('GET', '/stock'); 
+                const stocks: Stock[] = (await makeRequest<Stock[]>('GET', '/stock')).data; 
                 setData(stocks);
             } catch (error) {
                 console.warn('Error fetching stocks:', error);
@@ -73,7 +73,7 @@ function StockListComponent() {
             <Box p={4}>
                 <Heading>Stock</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} title={'Add Stock'} icon={FaPlus} action={handleCreate} />
+                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

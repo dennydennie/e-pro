@@ -62,7 +62,7 @@ function UserListComponent() {
     React.useEffect(() => {
         const getUsers = async () => {
             try {
-                const users: User[] = await makeRequest<User[]>('GET', '/user');
+                const users: User[] = (await makeRequest<User[]>('GET', '/user')).data;
                 setData(users);
             } catch (error) {
                 console.warn('Error fetching users:', error);
@@ -85,7 +85,7 @@ function UserListComponent() {
             <Box p={4}>
                 <Heading>Users</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} title={'Add User'} icon={FaPlus} action={handleCreate} />
+                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

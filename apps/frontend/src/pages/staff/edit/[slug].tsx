@@ -17,7 +17,7 @@ export default function EditFactoryStaff() {
         const fetchFactoryStaff = async () => {
             if (factoryStaffId) {
                 try {
-                    const data: FactoryStaff = await makeRequest<FactoryStaff>('GET', `/factory-staff/${factoryStaffId}`);
+                    const data: FactoryStaff = (await makeRequest<FactoryStaff>('GET', `/factory-staff/${factoryStaffId}`)).data;
                     setInitialData(data);
                 } catch (error) {
                     console.error('Error fetching factory staff:', error);

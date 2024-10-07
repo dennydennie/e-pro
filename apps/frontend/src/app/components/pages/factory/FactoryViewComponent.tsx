@@ -36,7 +36,7 @@ function FactoryDetailViewComponent({ factoryId }: { factoryId: string }) {
     React.useEffect(() => {
         const fetchFactory = async () => {
             try {
-                const data: Factory = await makeRequest<Factory>('GET', `/factory/${factoryId}`);
+                const data: Factory = (await makeRequest<Factory>('GET', `/factory/${factoryId}`)).data;
                 setFactory(data);
             } catch (err) {
                 console.error('Error fetching factory:', err);

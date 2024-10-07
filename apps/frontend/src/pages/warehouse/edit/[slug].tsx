@@ -17,7 +17,7 @@ export default function EditWarehouse() {
         const fetchWarehouse = async () => {
             if (warehouseId) {
                 try {
-                    const data: Warehouse = await makeRequest<Warehouse>('GET', `/warehouse/${warehouseId}`);
+                    const data: Warehouse = (await makeRequest<Warehouse>('GET', `/warehouse/${warehouseId}`)).data;
                     setInitialData(data);
                 } catch (error) {
                     console.error('Error fetching warehouse:', error);

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, HStack } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
 import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
@@ -7,6 +7,7 @@ import { factoryStaffSchema } from "./staff-schema";
 import { FactoryStaff } from "@/app/types/factory-staff";
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
+import { useRouter } from "next/router";
 
 interface FactoryStaffFormProps {
     initialData?: FactoryStaff;
@@ -24,8 +25,8 @@ const uiSchema = {
     },
     department: {
         "ui:widget": "text"
-    },    id: {
-        "ui:widget": "hidden" 
+    }, id: {
+        "ui:widget": "hidden"
     }
 };
 
@@ -33,9 +34,14 @@ const FactoryStaffForm: React.FC<FactoryStaffFormProps> = ({ initialData }) => {
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
+    const router = useRouter();
 
     if (!!initialData) {
         factoryStaffSchema.properties.id.default = initialData?.id as string;
+    }
+
+    const handleCancel = () => {
+        router.push('/staff');
     }
 
     const handleSubmit = async (data: IChangeEvent<FactoryStaff>, event: React.FormEvent<HTMLFormElement>) => {
@@ -49,18 +55,33 @@ const FactoryStaffForm: React.FC<FactoryStaffFormProps> = ({ initialData }) => {
         try {
             let response;
 
-            if (!!formData.id) {
-                response = await makeRequest<FactoryStaff>('PUT', `/factory-staff/${formData.id}`, formData);
+            if (formData.id !== "") {
+                response = await makeRequest<FactoryStaff>('PATCH', `/factory-staff/${formData.id}`, formData);
                 const success = "The operation was successful!";
-                setMessageType('success');
-                setMessage(success);
-                setIsMessageModalOpen(true);
+                if (response.status === 200) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             } else {
-                response = await makeRequest<FactoryStaff>('POST', '/factory-staff', formData);
-                const error = "Something went wrong!";
-                setMessageType('error');
-                setMessage(error);
-                setIsMessageModalOpen(true);
+                response = await makeRequest<FactoryStaff>('POST', '/factory-staff', {...formData, id: undefined});
+                if (response.status === 201) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             }
 
         } catch (error) {
@@ -69,7 +90,8 @@ const FactoryStaffForm: React.FC<FactoryStaffFormProps> = ({ initialData }) => {
     };
 
     return (
-        <Box width="100%">
+        <Box width="50%">
+             <Heading my={4}>Add Product</Heading>
             <Form
                 schema={factoryStaffSchema}
                 uiSchema={uiSchema}
@@ -78,11 +100,14 @@ const FactoryStaffForm: React.FC<FactoryStaffFormProps> = ({ initialData }) => {
                 liveValidate
                 validator={validator}
             >
-                          <Box mt={4}>
-                    <Button type="submit" colorScheme="teal">
+                <HStack mt={4} spacing={8}>
+                    <Button type="submit" colorScheme="blue">
                         Submit
                     </Button>
-                </Box>
+                    <Button colorScheme="red" onClick={handleCancel} aria-label="Cancel action">
+                        Cancel
+                    </Button>
+                </HStack>
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, HStack } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
 import { warehouseSchema } from "./warehouse-schema";
 import { IChangeEvent } from "@rjsf/core";
@@ -7,6 +7,7 @@ import validator from '@rjsf/validator-ajv8';
 import { Warehouse } from "@/app/types/warehouse";
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
+import { useRouter } from "next/navigation";
 
 interface WarehouseFormProps {
     initialData?: Warehouse;
@@ -23,9 +24,9 @@ const uiSchema = {
         "ui:widget": "text"
     },
     phoneNumber: {
-           "ui:options": {
-      "inputType": "tel"
-    }
+        "ui:options": {
+            "inputType": "tel"
+        }
     },
     latitude: {
         "ui:widget": "updown"
@@ -45,9 +46,14 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({ initialData }) => {
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
+    const router = useRouter();
 
     if (!!initialData) {
         warehouseSchema.properties.id.default = initialData?.id as string;
+    }
+
+    const handleCancel = () => {
+        router.push('/warehouse');
     }
 
     const handleSubmit = async (data: IChangeEvent<Warehouse>, event: React.FormEvent<HTMLFormElement>) => {
@@ -61,18 +67,32 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({ initialData }) => {
         try {
             let response;
 
-            if (!!formData.id) {
-                response = await makeRequest<Warehouse>('PUT', `/warehouse/${formData.id}`, formData);
-                const success = "The operation was successful!";
-                setMessageType('success');
-                setMessage(success);
-                setIsMessageModalOpen(true);
+            if (formData.id !== "") {
+                response = await makeRequest<Warehouse>('PATCH', `/warehouse/${formData.id}`, formData);
+                if (response.status === 200) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             } else {
-                response = await makeRequest<Warehouse>('POST', '/warehouse', formData);
-                const error = "Something went wrong!";
-                setMessageType('error');
-                setMessage(error);
-                setIsMessageModalOpen(true);
+                response = await makeRequest<Warehouse>('POST', '/warehouse', {...formData, id: undefined});
+                if (response.status === 201) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             }
 
         } catch (error) {
@@ -81,7 +101,8 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({ initialData }) => {
     };
 
     return (
-        <Box width="100%">
+        <Box width="50%">
+             <Heading my={4}>Add Warehouse</Heading>
             <Form
                 schema={warehouseSchema}
                 uiSchema={uiSchema}
@@ -90,11 +111,14 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({ initialData }) => {
                 liveValidate
                 validator={validator}
             >
-                <Box mt={4}>
-                    <Button type="submit" colorScheme="teal">
+                <HStack mt={4} spacing={8}>
+                    <Button type="submit" colorScheme="blue">
                         Submit
                     </Button>
-                </Box>
+                    <Button colorScheme="red" onClick={handleCancel} aria-label="Cancel action">
+                        Cancel
+                    </Button>
+                </HStack>
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}

@@ -36,7 +36,7 @@ function FactoryStaffDetailViewComponent({ staffId }: {staffId: string}) {
     React.useEffect(() => {
         const fetchFactoryStaff = async () => {
             try {
-                const data: FactoryStaff = await makeRequest<FactoryStaff>('GET', `/factory-staff/${staffId}`);
+                const data: FactoryStaff = (await makeRequest<FactoryStaff>('GET', `/factory-staff/${staffId}`)).data;
                 setFactoryStaff(data);
             } catch (err) {
                 console.error('Error fetching factory staff:', err);

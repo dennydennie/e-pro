@@ -55,7 +55,7 @@ function FactoryStaffListComponent() {
     React.useEffect(() => {
         const getFactoryStaff = async () => {
             try {
-                const staff: FactoryStaff[] = await makeRequest<FactoryStaff[]>('GET', '/factory-staff'); 
+                const staff: FactoryStaff[] = (await makeRequest<FactoryStaff[]>('GET', '/factory-staff')).data; 
                 setData(staff);
             } catch (error) {
                 console.warn('Error fetching factory staff:', error);
@@ -65,11 +65,11 @@ function FactoryStaffListComponent() {
     }, []);
 
     const handleCreate = () => {
-        router.push('factoryStaff/add');
+        router.push('staff/add');
     };
 
     const handleRowClick = (id: string) => {
-        router.push(`factoryStaff/edit/${id}`);
+        router.push(`staff/edit/${id}`);
     };
 
     return (
@@ -77,7 +77,7 @@ function FactoryStaffListComponent() {
             <Box p={4}>
                 <Heading>Factory Staff</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} title={'Add Factory Staff'} icon={FaPlus} action={handleCreate} />
+                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

@@ -36,7 +36,7 @@ function OrderLineDetailViewComponent({ orderLineId }: { orderLineId: string }) 
     React.useEffect(() => {
         const fetchOrderLine = async () => {
             try {
-                const data: OrderLine = await makeRequest<OrderLine>('GET', `/order-line/${orderLineId}`);
+                const data: OrderLine = (await makeRequest<OrderLine>('GET', `/order-line/${orderLineId}`)).data;
                 setOrderLine(data);
             } catch (err) {
                 console.error('Error fetching order line:', err);

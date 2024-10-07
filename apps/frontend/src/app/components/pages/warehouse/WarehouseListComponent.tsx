@@ -62,7 +62,7 @@ function WarehouseListComponent() {
     React.useEffect(() => {
         const getWarehouses = async () => {
             try {
-                const warehouses: Warehouse[] = await makeRequest<Warehouse[]>('GET', '/warehouse'); 
+                const warehouses: Warehouse[] = (await makeRequest<Warehouse[]>('GET', '/warehouse')).data; 
                 setData(warehouses);
             } catch (error) {
                 console.warn('Error fetching warehouses:', error);
@@ -73,11 +73,11 @@ function WarehouseListComponent() {
     }, []);
 
     const handleCreate = () => {
-        router.push('warehouses/add');
+        router.push('warehouse/add');
     };
 
     const handleRowClick = (id: string) => {
-        router.push(`warehouses/edit/${id}`);
+        router.push(`warehouse/edit/${id}`);
     };
 
     return (
@@ -85,7 +85,7 @@ function WarehouseListComponent() {
             <Box p={4}>
                 <Heading>Warehouses</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} title={'Add Warehouse'} icon={FaPlus} action={handleCreate} />
+                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

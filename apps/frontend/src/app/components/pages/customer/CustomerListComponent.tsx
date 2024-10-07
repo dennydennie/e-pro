@@ -126,7 +126,7 @@ function CustomerListComponent() {
             <Box p={4}>
                 <Heading>Customers</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} title={'Add Customer'} icon={FaPlus} action={handleCreate} />
+                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

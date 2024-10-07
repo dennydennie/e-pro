@@ -12,7 +12,7 @@ import { FaPlus } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
-import { Factory } from '@/app/types/factory'; 
+import { Factory } from '@/app/types/factory';
 import makeRequest from '@/app/services/backend';
 
 
@@ -20,8 +20,8 @@ const theme = extendTheme({
     styles: {
         global: {
             body: {
-                bg: 'blue.50', 
-                color: 'blue.800', 
+                bg: 'blue.50',
+                color: 'blue.800',
             },
         },
     },
@@ -63,7 +63,7 @@ function FactoryListComponent() {
     React.useEffect(() => {
         const getFactories = async () => {
             try {
-                const factories: Factory[] = await makeRequest<Factory[]>('GET', '/factory'); 
+                const factories: Factory[] = (await makeRequest<Factory[]>('GET', '/factory')).data;
                 setData(factories);
             } catch (error) {
                 console.warn('Error fetching factories:', error);
@@ -85,7 +85,7 @@ function FactoryListComponent() {
             <Box p={4}>
                 <Heading>Factories</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} title={'Add Factory'} icon={FaPlus} action={handleCreate} />
+                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

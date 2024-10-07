@@ -1,12 +1,13 @@
 import React, { useState } from "react";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, HStack } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
-import { stockSchema } from "./stock-schema"; 
+import { stockSchema } from "./stock-schema";
 import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
 import { Stock } from "@/app/types/stock";
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
+import { useRouter } from "next/router";
 
 interface StockFormProps {
     initialData?: Stock;
@@ -21,8 +22,8 @@ const uiSchema = {
     },
     quantity: {
         "ui:widget": "updown"
-    },    id: {
-        "ui:widget": "hidden" 
+    }, id: {
+        "ui:widget": "hidden"
     }
 };
 
@@ -30,9 +31,14 @@ const StockForm: React.FC<StockFormProps> = ({ initialData }) => {
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
+    const router = useRouter();
 
     if (!!initialData) {
         stockSchema.properties.id.default = initialData?.id as string;
+    }
+
+    const handleCancel = () => {
+        router.push('/stock');
     }
 
     const handleSubmit = async (data: IChangeEvent<Stock>, event: React.FormEvent<HTMLFormElement>) => {
@@ -46,18 +52,32 @@ const StockForm: React.FC<StockFormProps> = ({ initialData }) => {
         try {
             let response;
 
-            if (!!formData.id) {
-                response = await makeRequest<Stock>('PUT', `/stock/${formData.id}`, formData);
-                const success = "The operation was successful!";
-                setMessageType('success');
-                setMessage(success);
-                setIsMessageModalOpen(true);
+            if (formData.id !== "") {
+                response = await makeRequest<Stock>('PATCH', `/stock/${formData.id}`, formData);
+                if (response.status === 200) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             } else {
-                response = await makeRequest<Stock>('POST', '/stock', formData);
-                const error = "Something went wrong!";
-                setMessageType('error');
-                setMessage(error);
-                setIsMessageModalOpen(true);
+                response = await makeRequest<Stock>('POST', '/stock', {...formData, id: undefined});
+                if (response.status === 201) {
+                    const success = "The operation was successful!";
+                    setMessageType('success');
+                    setMessage(success);
+                    setIsMessageModalOpen(true);
+                } else {
+                    const error = "Something went wrong!";
+                    setMessageType('error');
+                    setMessage(error);
+                    setIsMessageModalOpen(true);
+                }
             }
 
         } catch (error) {
@@ -66,7 +86,8 @@ const StockForm: React.FC<StockFormProps> = ({ initialData }) => {
     };
 
     return (
-        <Box width="100%">
+        <Box width="50%">
+             <Heading my={4}>Add Product</Heading>
             <Form
                 schema={stockSchema}
                 uiSchema={uiSchema}
@@ -75,11 +96,14 @@ const StockForm: React.FC<StockFormProps> = ({ initialData }) => {
                 liveValidate
                 validator={validator}
             >
-                          <Box mt={4}>
-                    <Button type="submit" colorScheme="teal">
+                <HStack mt={4} spacing={8}>
+                    <Button type="submit" colorScheme="blue">
                         Submit
                     </Button>
-                </Box>
+                    <Button colorScheme="red" onClick={handleCancel} aria-label="Cancel action">
+                        Cancel
+                    </Button>
+                </HStack>
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}

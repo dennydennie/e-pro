@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button } from "@chakra-ui/react";
+import { Box, Button, HStack } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
 import { productSchema } from "./product-schema";
 import { IChangeEvent } from "@rjsf/core";
@@ -59,6 +59,10 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
         productSchema.properties.id.default = initialData?.id as string;
     }
 
+    const handleCancel = () => {
+        router.push('/product');
+    }
+
     const handleSubmit = async (data: IChangeEvent<Product>, event: React.FormEvent<HTMLFormElement>) => {
 
         if (!data.formData) {
@@ -104,7 +108,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
     };
 
     return (
-        <Box width="100%">
+        <Box width="50%">
+            <Heading my={4}>Add Product</Heading>
             <Form
                 schema={productSchema}
                 uiSchema={uiSchema}
@@ -113,11 +118,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
                 liveValidate
                 validator={validator}
             >
-                <Box mt={4}>
-                    <Button type="submit" colorScheme="teal">
+                <HStack mt={4} spacing={8}>
+                    <Button type="submit" colorScheme="blue">
                         Submit
                     </Button>
-                </Box>
+                    <Button colorScheme="red" onClick={handleCancel} aria-label="Cancel action">
+                        Cancel
+                    </Button>
+                </HStack>
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}
