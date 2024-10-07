@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, HStack } from "@chakra-ui/react";
+import { Box, Button, HStack, Heading } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
 import { stockSchema } from "./stock-schema";
 import { IChangeEvent } from "@rjsf/core";

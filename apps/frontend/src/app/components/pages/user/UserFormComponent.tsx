@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Button, HStack } from "@chakra-ui/react";
+import { Box, Button, HStack , Heading} from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
 import { User } from "@/app/types/user";
 import { userSchema } from "./user-schema";

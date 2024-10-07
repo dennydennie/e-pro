@@ -71,7 +71,7 @@ const Navbar = () => {
                             <Icon
                                 as={link.icon}
                                 color={router.pathname.includes(link.basePath) ? 'white' : 'blue.200'}
-                                mr={2}
+                                mr={1}
                             />
                             <Box
                                 as="span"
@@ -87,8 +87,8 @@ const Navbar = () => {
                     <Flex
                         alignItems="center"
                         color="white"
-                        _hover={{ color: 'red.300' }}
-                        as="a" // Use 'as' to render the Flex as a link
+                        _hover={{ color: 'red' }}
+                        as="a"
                         onClick={() => handleLogout()}
                     >
                         <Icon as={FaPowerOff} boxSize={5} mx={2} />
