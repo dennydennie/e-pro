@@ -1,25 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Button, HStack, Heading } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
 import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
-import { factoryStaffSchema } from "./staff-schema";
 import { FactoryStaff } from "@/app/types/factory-staff";
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/router";
+import { Factory } from "@/app/types/factory";
+import { User } from "@/app/types/user";
+import { createFactoryStaffSchema } from "./staff-schema";
+import { handleResponse } from "@/app/utils/handle-api-response";
 
 interface FactoryStaffFormProps {
     initialData?: FactoryStaff;
 }
 
 const uiSchema = {
-    userId: {
-        "ui:widget": "text"
-    },
-    factoryId: {
-        "ui:widget": "text"
-    },
     jobTitle: {
         "ui:widget": "text"
     },
@@ -35,17 +32,34 @@ const FactoryStaffForm: React.FC<FactoryStaffFormProps> = ({ initialData }) => {
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
     const router = useRouter();
+    const [users, setUsers] = useState<User[]>([]);
+    const [factories, setFactories] = useState<Factory[]>([]);
 
-    if (!!initialData) {
-        factoryStaffSchema.properties.id.default = initialData?.id as string;
-    }
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const factotiesResponse = await makeRequest<Factory[]>('GET', '/factory');
+                setFactories(factotiesResponse.data);
+
+                const usersResponse = await makeRequest<User[]>('GET', '/user');
+                setUsers(usersResponse.data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const id = initialData?.id ?? '';
+
+    const factoryStaffSchema = createFactoryStaffSchema(users, factories, id);
 
     const handleCancel = () => {
         router.push('/staff');
     }
 
     const handleSubmit = async (data: IChangeEvent<FactoryStaff>, event: React.FormEvent<HTMLFormElement>) => {
-
         if (!data.formData) {
             return;
         }
@@ -54,50 +68,32 @@ const FactoryStaffForm: React.FC<FactoryStaffFormProps> = ({ initialData }) => {
 
         try {
             let response;
+            const isUpdating = formData.id !== "";
+            const method = isUpdating ? 'PATCH' : 'POST';
+            const url = isUpdating ? `/factory-staff/${formData.id}` : '/factory-staff';
+            const requestData = isUpdating ? formData : { ...formData, id: undefined };
 
-            if (formData.id !== "") {
-                response = await makeRequest<FactoryStaff>('PATCH', `/factory-staff/${formData.id}`, formData);
-                const success = "The operation was successful!";
-                if (response.status === 200) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
-            } else {
-                response = await makeRequest<FactoryStaff>('POST', '/factory-staff', {...formData, id: undefined});
-                if (response.status === 201) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
-            }
+            response = await makeRequest<FactoryStaff>(method, url, requestData);
 
-        } catch (error) {
+            handleResponse(response.status, setMessage, setMessageType, setIsMessageModalOpen);
+
+        } catch (error: any) {
             console.error('Error occurred while processing the form:', error);
+            const errorMessage = `Error: ${error.message}`;
+            setMessageType('error');
+            setMessage(errorMessage);
+            setIsMessageModalOpen(true);
         }
     };
 
     return (
         <Box width="50%">
-             <Heading my={4}>Add Product</Heading>
+            <Heading my={4}>Assign Staff Roles</Heading>
             <Form
                 schema={factoryStaffSchema}
                 uiSchema={uiSchema}
                 formData={initialData}
                 onSubmit={handleSubmit}
-                liveValidate
                 validator={validator}
             >
                 <HStack mt={4} spacing={8}>
@@ -111,7 +107,12 @@ const FactoryStaffForm: React.FC<FactoryStaffFormProps> = ({ initialData }) => {
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}
-                onClose={() => setIsMessageModalOpen(false)}
+                onClose={() => {
+                    setIsMessageModalOpen(false);
+                    handleCancel();
+
+                }
+                }
                 message={message}
                 type={messageType}
             />

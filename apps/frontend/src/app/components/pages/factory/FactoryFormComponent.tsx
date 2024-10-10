@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, HStack, Heading } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
-import { factorySchema } from "./factory-schema";
 import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
 import { Factory } from "@/app/types/factory";
@@ -9,6 +8,8 @@ import makeRequest from "@/app/services/backend";
 import { Customer } from "@/app/types/customer";
 import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/navigation";
+import { User } from "@/app/types/user";
+import { createFactorySchema } from "./factory-schema";
 
 interface FactoryFormProps {
     initialData?: Factory;
@@ -27,16 +28,15 @@ const uiSchema = {
         }
     },
     latitude: {
-        "ui:widget": "updown"
+        "ui:widget": "text"
     },
     longitude: {
-        "ui:widget": "updown"
-    },
-    userId: {
         "ui:widget": "text"
-    }, id: {
+    },
+    id: {
         "ui:widget": "hidden"
-    }
+    },
+    "ui:submitButtonOptions": { norender: true },
 };
 
 const FactoryForm: React.FC<FactoryFormProps> = ({ initialData }) => {
@@ -44,17 +44,30 @@ const FactoryForm: React.FC<FactoryFormProps> = ({ initialData }) => {
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
     const router = useRouter();
+    const [users, setUsers] = useState<User[]>([]);
 
-    if (!!initialData) {
-        factorySchema.properties.id.default = initialData?.id as string;
-    }
+    useEffect(() => {
+        const fetchFormData = async () => {
+            try {
+                const response = await makeRequest<User[]>('GET', '/user');
+                setUsers(response.data);
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        };
+
+        fetchFormData();
+
+    }, []);
+
+    const id = initialData?.id ?? "";
+    const factorySchema = createFactorySchema(users, id);
 
     const handleCancel = () => {
         router.push('/factory');
-    }
+    };
 
     const handleSubmit = async (data: IChangeEvent<Factory>, event: React.FormEvent<HTMLFormElement>) => {
-
         if (!data.formData) {
             return;
         }
@@ -66,35 +79,23 @@ const FactoryForm: React.FC<FactoryFormProps> = ({ initialData }) => {
 
             if (formData.id !== "") {
                 response = await makeRequest<Factory>('PATCH', `/factory/${formData.id}`, formData);
-                const success = "The operation was successful!";
-                if (response.status === 200) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
             } else {
-                response = await makeRequest<Factory>('POST', '/factory', {...formData, id: undefined});
-                if (response.status === 201) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
+                response = await makeRequest<Factory>('POST', '/factory', { ...formData, id: undefined });
             }
 
-        } catch (error) {
+            if (response.status === 200 || response.status === 201) {
+                setMessageType('success');
+                setMessage("The operation was successful!");
+            } else {
+                throw new Error("Something went wrong!");
+            }
+
+            setIsMessageModalOpen(true);
+        } catch (error: any) {
             console.error('Error occurred while processing the form:', error);
+            setMessageType('error');
+            setMessage(error.message || 'Something went wrong!');
+            setIsMessageModalOpen(true);
         }
     };
 
@@ -120,7 +121,10 @@ const FactoryForm: React.FC<FactoryFormProps> = ({ initialData }) => {
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}
-                onClose={() => setIsMessageModalOpen(false)}
+                onClose={() => {
+                    setIsMessageModalOpen(false);
+                    handleCancel();
+                }}
                 message={message}
                 type={messageType}
             />

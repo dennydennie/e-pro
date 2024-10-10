@@ -28,7 +28,7 @@ export class StockService {
     });
 
     if (existingStock) {
-      throw new BadRequestException('A stock record already exists for this product in the warehouse.');
+      throw new BadRequestException('A stock record already exists for this product in the warehouse. Please edit quantity of the existing record');
     }
 
     const product = await this.productRepository.findOneBy({

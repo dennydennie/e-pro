@@ -54,7 +54,7 @@ function StockThresholdListComponent() {
     React.useEffect(() => {
         const getStockThresholds = async () => {
             try {
-                const thresholds: StockThreshold[] = (await makeRequest<StockThreshold[]>('GET', '/stock-thresholds')).data; 
+                const thresholds: StockThreshold[] = (await makeRequest<StockThreshold[]>('GET', '/stock-threshold')).data; 
                 setData(thresholds);
             } catch (error) {
                 console.warn('Error fetching stock thresholds:', error);
@@ -65,11 +65,11 @@ function StockThresholdListComponent() {
     }, []);
 
     const handleCreate = () => {
-        router.push('stock-threshold/add');
+        router.push('threshold/add');
     };
 
     const handleRowClick = (id: string) => {
-        router.push(`stock-threshold/edit/${id}`);
+        router.push(`threshold/edit/${id}`);
     };
 
     return (

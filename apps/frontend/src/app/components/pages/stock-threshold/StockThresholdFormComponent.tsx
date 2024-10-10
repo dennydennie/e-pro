@@ -1,25 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, HStack, Heading } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
 import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
-import { stockThresholdSchema } from "./stock-threshold-schema";
 import { StockThreshold } from "@/app/types/stock-threshold";
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/router";
+import { Product } from "@/app/types/product";
+import { Warehouse } from "@/app/types/warehouse";
+import { handleResponse } from "@/app/utils/handle-api-response";
+import { createStockThresholdSchema } from "./stock-threshold-schema";
 
 interface StockThresholdFormProps {
     initialData?: StockThreshold;
 }
 
 const uiSchema = {
-    productId: {
-        "ui:widget": "text"
-    },
-    warehouseId: {
-        "ui:widget": "text"
-    },
     lowStockThreshold: {
         "ui:widget": "updown"
     },
@@ -36,13 +33,30 @@ const StockThresholdForm: React.FC<StockThresholdFormProps> = ({ initialData }) 
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
     const router = useRouter();
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
 
-    if (!!initialData) {
-        stockThresholdSchema.properties.id.default = initialData?.id as string;
-    }
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const productsResponse = await makeRequest<Product[]>('GET', '/product');
+                setProducts(productsResponse.data);
+
+                const warehousesResponse = await makeRequest<Warehouse[]>('GET', '/warehouse');
+                setWarehouses(warehousesResponse.data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const id = initialData?.id ?? '';
+    const stockThresholdSchema = createStockThresholdSchema(products, warehouses, id);
 
     const handleCancel = () => {
-        router.push('/stock-threshold');
+        router.push('/threshold');
     }
 
     const handleSubmit = async (data: IChangeEvent<StockThreshold>, event: React.FormEvent<HTMLFormElement>) => {
@@ -58,40 +72,24 @@ const StockThresholdForm: React.FC<StockThresholdFormProps> = ({ initialData }) 
 
             if (formData.id !== "") {
                 response = await makeRequest<StockThreshold>('PATCH', `/stock-threshold/${formData.id}`, formData);
-                if (response.status === 200) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
             } else {
-                response = await makeRequest<StockThreshold>('POST', '/stock-threshold', {...formData, id: undefined});
-                if (response.status === 201) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
+                response = await makeRequest<StockThreshold>('POST', '/stock-threshold', { ...formData, id: undefined });
             }
 
-        } catch (error) {
+            handleResponse(response.status, setMessage, setMessageType, setIsMessageModalOpen);
+
+        } catch (error: any) {
             console.error('Error occurred while processing the form:', error);
+            const errorMessage = `Error: ${error.message}`;
+            setMessageType('error');
+            setMessage(errorMessage);
+            setIsMessageModalOpen(true);
         }
     };
 
     return (
         <Box width="50%">
-             <Heading my={4}>Add Stock Threshold</Heading>
+            <Heading my={4}>Add Stock Threshold</Heading>
             <Form
                 schema={stockThresholdSchema}
                 uiSchema={uiSchema}
@@ -104,14 +102,17 @@ const StockThresholdForm: React.FC<StockThresholdFormProps> = ({ initialData }) 
                     <Button type="submit" colorScheme="blue">
                         Submit
                     </Button>
-                    <Button colorScheme="red" onClick={handleCancel } aria-label="Cancel action">
+                    <Button colorScheme="red" onClick={handleCancel} aria-label="Cancel action">
                         Cancel
                     </Button>
                 </HStack>
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}
-                onClose={() => setIsMessageModalOpen(false)}
+                onClose={() => {
+                    setIsMessageModalOpen(false);
+                    handleCancel();
+                }}
                 message={message}
                 type={messageType}
             />

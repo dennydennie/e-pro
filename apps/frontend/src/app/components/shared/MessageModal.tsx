@@ -29,7 +29,7 @@ const MessageModal: React.FC<MessageModalProps> = ({ isOpen, onClose, message, t
         <Modal isOpen={isOpen} onClose={onClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader textAlign={"center"}>{type === 'error' ? 'Error' : 'Success'}</ModalHeader>
+                <ModalHeader textAlign={"center"}>{type === 'error' ? ' ' : ' '}</ModalHeader>
                 <ModalBody>
                     <Alert status={type === 'error' ? 'error' : 'success'}>
                         <AlertIcon />

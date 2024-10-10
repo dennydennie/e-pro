@@ -1,22 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, HStack, Heading } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
-import { warehouseSchema } from "./warehouse-schema";
+import { createWarehouseSchema } from "./warehouse-schema";
 import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
 import { Warehouse } from "@/app/types/warehouse";
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/navigation";
+import { Factory } from "@/app/types/factory";
 
 interface WarehouseFormProps {
     initialData?: Warehouse;
 }
 
 const uiSchema = {
-    factoryId: {
-        "ui:widget": "text"
-    },
     name: {
         "ui:widget": "text"
     },
@@ -47,6 +45,24 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({ initialData }) => {
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
     const router = useRouter();
+    const [factories, setFactories] = useState<Factory[]>([]);
+
+    useEffect(() => {
+        const fetchFormData = async () => {
+            try {
+                const response = await makeRequest<Factory[]>('GET', '/factory');
+                setFactories(response.data);
+            } catch (error) {
+                console.error('Error fetching users:', error);
+            }
+        };
+
+        fetchFormData();
+
+    }, []);
+
+    const id = initialData?.id ?? '';
+    const warehouseSchema = createWarehouseSchema(factories, id)
 
     if (!!initialData) {
         warehouseSchema.properties.id.default = initialData?.id as string;
@@ -66,34 +82,23 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({ initialData }) => {
 
         try {
             let response;
+            const isUpdating = formData.id !== "";
 
-            if (formData.id !== "") {
-                response = await makeRequest<Warehouse>('PATCH', `/warehouse/${formData.id}`, formData);
-                if (response.status === 200) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
-            } else {
-                response = await makeRequest<Warehouse>('POST', '/warehouse', {...formData, id: undefined});
-                if (response.status === 201) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
-            }
+            const method = isUpdating ? 'PATCH' : 'POST';
+            const url = isUpdating ? `/warehouse/${formData.id}` : '/warehouse';
+            const requestData = isUpdating ? formData : { ...formData, id: undefined };
+
+            response = await makeRequest<Warehouse>(method, url, requestData);
+
+            const message = response.status === (isUpdating ? 200 : 201)
+                ? "The operation was successful!"
+                : "Something went wrong!";
+
+            const messageType = response.status === (isUpdating ? 200 : 201) ? 'success' : 'error';
+
+            setMessageType(messageType);
+            setMessage(message);
+            setIsMessageModalOpen(true);
 
         } catch (error) {
             console.error('Error occurred while processing the form:', error);
@@ -102,7 +107,7 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({ initialData }) => {
 
     return (
         <Box width="50%">
-             <Heading my={4}>Add Warehouse</Heading>
+            <Heading my={4}>Add Warehouse</Heading>
             <Form
                 schema={warehouseSchema}
                 uiSchema={uiSchema}

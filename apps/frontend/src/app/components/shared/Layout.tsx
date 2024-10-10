@@ -33,9 +33,9 @@ const Navbar = () => {
         { title: 'Products', basePath: '/product', icon: FaBox },
         { title: 'Stocks', basePath: '/stock', icon: FaClipboardList },
         { title: 'Users', basePath: '/user', icon: FaUserCog },
-        { title: 'Stock Thresholds', basePath: '/stock-threshold', icon: FaChartBar },
+        { title: 'Thresholds', basePath: '/threshold', icon: FaChartBar },
         { title: 'Orders', basePath: '/order', icon: FaShoppingCart },
-        { title: 'Factory Staff', basePath: '/staff', icon: FaUserTie },
+        { title: 'Staff', basePath: '/staff', icon: FaUserTie },
     ];
 
     const ordinaryUserLinks: CustomLinkType[] = [
@@ -59,7 +59,7 @@ const Navbar = () => {
     return (
         <Flex as="nav" position="fixed" top="0" left="0" w="100%" bg="blue.600" p={6} zIndex="1000" boxShadow="md" alignItems="center">
             <Heading as="a" href="/" color="white" mr="auto">E PROcure</Heading>
-            <Stack direction="row" spacing={4}>
+            <Stack direction="row" spacing={[8, 6]}>
                 {userLinks.map((link, index) => (
                     <Link key={index} href={link.basePath} passHref>
                         <Flex

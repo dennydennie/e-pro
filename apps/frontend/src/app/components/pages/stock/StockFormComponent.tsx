@@ -1,25 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, HStack, Heading } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
-import { stockSchema } from "./stock-schema";
+import { createStockSchema } from "./stock-schema";
 import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
 import { Stock } from "@/app/types/stock";
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/router";
+import { Warehouse } from "@/app/types/warehouse";
+import { Product } from "@/app/types/product";
+import { handleResponse } from "@/app/utils/handle-api-response";
 
 interface StockFormProps {
     initialData?: Stock;
 }
 
 const uiSchema = {
-    productId: {
-        "ui:widget": "text"
-    },
-    warehouseId: {
-        "ui:widget": "text"
-    },
     quantity: {
         "ui:widget": "updown"
     }, id: {
@@ -32,10 +29,27 @@ const StockForm: React.FC<StockFormProps> = ({ initialData }) => {
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
     const router = useRouter();
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
 
-    if (!!initialData) {
-        stockSchema.properties.id.default = initialData?.id as string;
-    }
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const productsResponse = await makeRequest<Product[]>('GET', '/product');
+                setProducts(productsResponse.data);
+
+                const warehousesResponse = await makeRequest<Warehouse[]>('GET', '/warehouse');
+                setWarehouses(warehousesResponse.data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const id = initialData?.id ?? '';
+    const stockSchema = createStockSchema(products, warehouses, id);
 
     const handleCancel = () => {
         router.push('/stock');
@@ -54,40 +68,24 @@ const StockForm: React.FC<StockFormProps> = ({ initialData }) => {
 
             if (formData.id !== "") {
                 response = await makeRequest<Stock>('PATCH', `/stock/${formData.id}`, formData);
-                if (response.status === 200) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
             } else {
-                response = await makeRequest<Stock>('POST', '/stock', {...formData, id: undefined});
-                if (response.status === 201) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
+                response = await makeRequest<Stock>('POST', '/stock', { ...formData, id: undefined });
             }
 
-        } catch (error) {
+            handleResponse(response.status, setMessage, setMessageType, setIsMessageModalOpen);
+
+        } catch (error: any) {
             console.error('Error occurred while processing the form:', error);
+            const errorMessage = `Error: ${error.message}`;
+            setMessageType('error');
+            setMessage(errorMessage);
+            setIsMessageModalOpen(true);
         }
     };
 
     return (
         <Box width="50%">
-             <Heading my={4}>Add Product</Heading>
+            <Heading fontSize={'2xl'} my={4}>Add Stock Record</Heading>
             <Form
                 schema={stockSchema}
                 uiSchema={uiSchema}
