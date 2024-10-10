@@ -12,6 +12,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FactoryService } from './factory.service';
 import { CreateFactoryDto } from './dto/create-factory.dto';
 import { UpdateFactoryDto } from './dto/update-factory.dto';
+import {FactorySummary} from './domain/factory-summary';
 
 @ApiTags('Factories')
 @Controller('factory')
@@ -50,7 +51,7 @@ export class FactoryController {
   @ApiResponse({ status: 200, description: 'The factory data.' })
   @ApiResponse({ status: 404, description: 'Factory not found.' })
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<FactorySummary> {
     return await this.factoryService.findOne(id);
   }
 

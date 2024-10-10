@@ -72,7 +72,7 @@ function UserDetailViewComponent({ userId }: { userId: string }) {
                 )}
                 {user ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>User Details</Heading>
+                        <Heading fontSize={'2xl'} my={4}>User Details</Heading>
                         <Divider />
                         <Text><strong>Name:</strong> {user.name}</Text>
                         <Text><strong>Email:</strong> {user.email}</Text>

@@ -85,13 +85,14 @@ const StockForm: React.FC<StockFormProps> = ({ initialData }) => {
 
     return (
         <Box width="50%">
-            <Heading fontSize={'2xl'} my={4}>Add Stock Record</Heading>
+            <Heading fontSize={'2xl'} my={4}>
+                {initialData ? 'Edit Stock Record' : 'Add Stock Record'}
+            </Heading>
             <Form
                 schema={stockSchema}
                 uiSchema={uiSchema}
                 formData={initialData}
                 onSubmit={handleSubmit}
-                liveValidate
                 validator={validator}
             >
                 <HStack mt={4} spacing={8}>

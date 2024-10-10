@@ -6,6 +6,7 @@ import { FactoryRepository } from 'src/db/repository/factory.repository';
 import { FactoryEntity } from 'src/db/entity/factory.entity';
 import { UserRepository } from 'src/db/repository/user.repository';
 import { IsNull } from 'typeorm';
+import { FactorySummary } from './domain/factory-summary';
 
 @Injectable()
 export class FactoryService {
@@ -32,25 +33,31 @@ export class FactoryService {
     return await this.factoryRepository.find();
   }
 
-  async findOne(id: string): Promise<FactoryEntity> {
+  async findOne(id: string): Promise<FactorySummary> {
     const factory = await this.factoryRepository.findOne({ where: { id } });
     if (!factory) {
       throw new NotFoundException(`Factory with ID ${id} not found`);
     }
-    return factory;
+    return FactorySummary.fromEntity(factory);
   }
 
   async update(
     id: string,
     updateFactoryDto: UpdateFactoryDto,
   ): Promise<FactoryEntity> {
-    const factory = await this.findOne(id);
+    const factory = await this.factoryRepository.findOne({ where: { id } });
+    if (!factory) {
+      throw new NotFoundException(`Factory with ID ${id} not found`);
+    }
     this.factoryRepository.merge(factory, updateFactoryDto);
     return await this.factoryRepository.save(factory);
   }
 
   async remove(id: string): Promise<void> {
-    const factory = await this.findOne(id);
+    const factory = await this.factoryRepository.findOne({ where: { id } });
+    if (!factory) {
+      throw new NotFoundException(`Factory with ID ${id} not found`);
+    }
     await this.factoryRepository.remove(factory);
   }
 }

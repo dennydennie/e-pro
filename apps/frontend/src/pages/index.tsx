@@ -29,7 +29,7 @@ const Dashboard = () => {
         { name: "Products", endPoint: '/product' },
     ];
 
-    const displayItems = user?.role === 'admin' ?items : ordinaryUserItems ;
+    const displayItems = user?.role === 'admin' ? items : ordinaryUserItems ;
 
     const [summaryData, setSummaryData] = useState(
         items.reduce((acc: any, item: any) => {

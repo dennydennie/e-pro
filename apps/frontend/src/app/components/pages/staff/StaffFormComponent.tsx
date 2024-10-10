@@ -88,7 +88,9 @@ const FactoryStaffForm: React.FC<FactoryStaffFormProps> = ({ initialData }) => {
 
     return (
         <Box width="50%">
-            <Heading my={4}>Assign Staff Roles</Heading>
+            <Heading fontSize={'2xl'} my={4}>
+                {initialData ? 'Edit Staff Roles' : 'Add Staff Roles'}
+            </Heading>
             <Form
                 schema={factoryStaffSchema}
                 uiSchema={uiSchema}

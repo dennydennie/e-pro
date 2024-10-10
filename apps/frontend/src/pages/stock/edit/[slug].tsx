@@ -33,6 +33,6 @@ export default function EditStock() {
     if (loading) {
         return <Loading />;
     }
-
+    console.log(initialData);
     return <StockForm initialData={initialData} />;
 }

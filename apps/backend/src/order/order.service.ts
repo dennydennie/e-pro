@@ -6,6 +6,7 @@ import { OrderRepository } from 'src/db/repository/order.repository';
 import { OrderEntity } from 'src/db/entity/order.entity';
 import { CustomerRepository } from 'src/db/repository/customer.repository';
 import { IsNull } from 'typeorm';
+import { Order } from './domain/order';
 
 @Injectable()
 export class OrderService {
@@ -29,8 +30,10 @@ export class OrderService {
     return await this.orderRepository.save(order);
   }
 
-  async findAll(): Promise<OrderEntity[]> {
-    return await this.orderRepository.find();
+  async findAll(): Promise<Order[]> {
+    const orders = await this.orderRepository.find();
+
+    return orders.map((order) => Order.fromEntity(order));
   }
 
   async findOne(id: string): Promise<OrderEntity> {

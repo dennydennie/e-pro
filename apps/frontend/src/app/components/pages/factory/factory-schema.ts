@@ -9,8 +9,8 @@ export const createFactorySchema = (users: User[], id?: string) => {
             id: { type: "string", title: "ID", default: id },
             name: { type: "string", title: "Factory Name" },
             address: { type: "string", title: "Address" },
-            latitude: { type: "string", title: "Latitude" },
-            longitude: { type: "string", title: "Longitude" },
+            latitude: { type: "number", title: "Latitude" },
+            longitude: { type: "number", title: "Longitude" },
             userId: {
                 title: "Manager",
                 type: ["string", "null"],
@@ -21,7 +21,6 @@ export const createFactorySchema = (users: User[], id?: string) => {
                         .value()
                 ),
             },
-            phoneNumber: { type: "string", title: "Phone Number" },
         },
         required: ["name", "address", "latitude", "longitude", "userId", "phoneNumber"],
     };

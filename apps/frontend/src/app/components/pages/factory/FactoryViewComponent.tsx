@@ -72,7 +72,7 @@ function FactoryDetailViewComponent({ factoryId }: { factoryId: string }) {
                 )}
                 {factory ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>{factory.name}</Heading>
+                        <Heading fontSize={'2xl'} my={4}>{factory.name}</Heading>
                         <Divider />
                         <Text><strong>Address:</strong> {factory.address}</Text>
                         <Text><strong>Latitude:</strong> {factory.latitude}</Text>

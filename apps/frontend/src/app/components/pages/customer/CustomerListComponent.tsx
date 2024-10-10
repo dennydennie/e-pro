@@ -124,7 +124,7 @@ function CustomerListComponent() {
     return (
         <ChakraProvider theme={theme}>
             <Box p={4}>
-                <Heading>Customers</Heading>
+                <Heading fontSize={'2xl'} my={4}>Customers</Heading>
                 <Box h={4} />
                 <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />

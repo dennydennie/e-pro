@@ -72,7 +72,7 @@ function WarehouseDetailViewComponent({ warehouseId }: { warehouseId: string }) 
                 )}
                 {warehouse ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>Warehouse Details</Heading>
+                        <Heading fontSize={'2xl'} my={4}>Warehouse Details</Heading>
                         <Divider />
                         <Text><strong>ID:</strong> {warehouse.id}</Text>
                         <Text><strong>Factory ID:</strong> {warehouse.factoryId}</Text>

@@ -72,7 +72,7 @@ function CustomerDetailViewComponent({ customerId }: { customerId: string }) {
                 )}
                 {customer ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>{customer.name}</Heading>
+                        <Heading fontSize={'2xl'} my={4}>{customer.name}</Heading>
                         <Divider />
                         <Text><strong>Email:</strong> {customer.email}</Text>
                         <Text><strong>Contact Person:</strong> {customer.contactPerson}</Text>

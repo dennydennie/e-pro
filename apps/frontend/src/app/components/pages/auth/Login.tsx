@@ -1,10 +1,12 @@
-import { Button, Box, Stack, Heading, Link, Center, Text } from '@chakra-ui/react';
+import { Button, Box, Stack, Heading, Center, Text } from '@chakra-ui/react';
 import Form from '@rjsf/chakra-ui';
 import { IChangeEvent } from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
 import { useRouter } from 'next/router';
 import { signIn } from 'next-auth/react';
 import { useState } from 'react';
+import Link from 'next/link';
+import { BlueLink } from './Register';
 
 const schema = {
     type: "object",
@@ -118,6 +120,11 @@ export default function LoginForm() {
                             Login
                         </Button>
                     </Form>
+                    <Text textAlign="center" mt={4}>
+                        Need an account ? {" "} <Link href="/auth/register" color="blue">
+                        <BlueLink>Register</BlueLink>
+                        </Link>
+                    </Text>
                 </Box>
             </Stack>
         </Center>

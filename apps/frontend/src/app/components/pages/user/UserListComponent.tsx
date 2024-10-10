@@ -83,7 +83,7 @@ function UserListComponent() {
     return (
         <ChakraProvider theme={theme}>
             <Box p={4}>
-                <Heading>Users</Heading>
+                <Heading fontSize={'2xl'} my={4}>Users</Heading>
                 <Box h={4} />
                 <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />

@@ -22,7 +22,7 @@ export class FactoryEntity extends AbstractEntity {
   )
   factoryStaff: FactoryStaffEntity[];
 
-  @ManyToOne(() => UserEntity, (user: UserEntity) => user.id)
+  @ManyToOne(() => UserEntity, (user: UserEntity) => user.id, { eager: true })
   manager: UserEntity;
 
   @Column({ nullable: true })

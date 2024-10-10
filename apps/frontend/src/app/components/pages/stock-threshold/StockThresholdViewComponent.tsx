@@ -72,7 +72,7 @@ function StockThresholdDetailViewComponent({ stockThresholdId }: {stockThreshold
                 )}
                 {stockThreshold ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>Stock Threshold Details</Heading>
+                        <Heading fontSize={'2xl'} my={4}>Stock Threshold Details</Heading>
                         <Divider />
                         <Text><strong>Product ID:</strong> {stockThreshold.productId}</Text>
                         <Text><strong>Warehouse ID:</strong> {stockThreshold.warehouseId}</Text>

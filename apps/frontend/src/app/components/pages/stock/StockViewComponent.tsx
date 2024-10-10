@@ -72,10 +72,10 @@ function StockDetailViewComponent({ stockId }: { stockId: string }) {
                 )}
                 {stock ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>Stock Details</Heading>
+                        <Heading fontSize={'2xl'} my={4}>Stock Details</Heading>
                         <Divider />
-                        <Text><strong>Product ID:</strong> {stock.productId}</Text>
-                        <Text><strong>Warehouse ID:</strong> {stock.warehouseId}</Text>
+                        <Text><strong>Product:</strong> {stock.product.name}</Text>
+                        <Text><strong>Warehouse:</strong> {stock.warehouse.name}</Text>
                         <Text><strong>Quantity:</strong> {stock.quantity}</Text>
                         <HStack spacing={4}>
                             <Button colorScheme="blue" onClick={handleEdit}>Edit</Button>

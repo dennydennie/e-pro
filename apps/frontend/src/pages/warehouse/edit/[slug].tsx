@@ -4,12 +4,12 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Loading from "@/app/components/shared/Loading";
 import makeRequest from "@/app/services/backend";
-import { Warehouse } from "@/app/types/warehouse"; 
+import { Warehouse } from "@/app/types/warehouse";
 import WarehouseForm from "@/app/components/pages/warehouse/WarehouseFormComponent";
 
 export default function EditWarehouse() {
     const router = useRouter();
-    const { slug:warehouseId } = router.query;
+    const { slug: warehouseId } = router.query;
     const [initialData, setInitialData] = useState<Warehouse | undefined>(undefined);
     const [loading, setLoading] = useState(true);
 
@@ -33,6 +33,7 @@ export default function EditWarehouse() {
     if (loading) {
         return <Loading />;
     }
+    console.log(initialData);
 
     return <WarehouseForm initialData={initialData} />;
 }

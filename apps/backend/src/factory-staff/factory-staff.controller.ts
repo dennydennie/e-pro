@@ -12,11 +12,13 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { FactoryStaffService } from './factory-staff.service';
 import { CreateFactoryStaffDto } from './dto/create-factory-staff.dto';
 import { UpdateFactoryStaffDto } from './dto/update-factory-staff.dto';
+import { FactoryStaffSummary } from './domain/factory-staff-summary';
+import { FactoryStaff } from './domain/factory';
 
 @ApiTags('Factory Staff')
 @Controller('factory-staff')
 export class FactoryStaffController {
-  constructor(private readonly factoryStaffService: FactoryStaffService) {}
+  constructor(private readonly factoryStaffService: FactoryStaffService) { }
 
   @ApiOperation({
     summary: 'Create a new factory staff member',
@@ -46,7 +48,7 @@ export class FactoryStaffController {
     description: 'The list of factory staff members.',
   })
   @Get()
-  async findAll() {
+  async findAll(): Promise<FactoryStaff[]> {
     return await this.factoryStaffService.findAll();
   }
 
@@ -58,7 +60,7 @@ export class FactoryStaffController {
   @ApiResponse({ status: 200, description: 'The factory staff member data.' })
   @ApiResponse({ status: 404, description: 'Factory staff member not found.' })
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id') id: string): Promise<FactoryStaffSummary> {
     return await this.factoryStaffService.findOne(id);
   }
 

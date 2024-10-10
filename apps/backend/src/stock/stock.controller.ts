@@ -6,6 +6,7 @@ import { CreateStockDto } from './dto/create-stock.dto';
 import { UpdateStockDto } from './dto/update-stock.dto';
 import { StockEntity } from 'src/db/entity/stock.entity';
 import { ProductSummaryDto } from './dto/product-summary.dto';
+import { Stock } from './domain/stock';
 
 @ApiTags('Stock')
 @Controller('stock')
@@ -29,7 +30,7 @@ export class StockController {
   })
   @ApiResponse({ status: 200, description: 'The list of stock entries.' })
   @Get()
-  async findAll() {
+  async findAll(): Promise<Stock[]> {
     return await this.stockService.findAll();
   }
 

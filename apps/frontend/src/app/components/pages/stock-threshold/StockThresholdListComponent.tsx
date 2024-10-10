@@ -19,8 +19,8 @@ const theme = extendTheme({
     styles: {
         global: {
             body: {
-                bg: 'blue.50', 
-                color: 'blue.800', 
+                bg: 'blue.50',
+                color: 'blue.800',
             },
         },
     },
@@ -29,13 +29,21 @@ const theme = extendTheme({
 const columnHelper = createColumnHelper<StockThreshold>();
 
 const columns = [
-    columnHelper.accessor('productId', {
+    columnHelper.accessor('product.name', {
         cell: info => info.getValue(),
-        header: () => <span>Product ID</span>,
+        header: () => <span>Product Name</span>,
     }),
-    columnHelper.accessor('warehouseId', {
+    columnHelper.accessor('product.description', {
         cell: info => info.getValue(),
-        header: () => <span>Warehouse ID</span>,
+        header: () => <span>Product Description</span>,
+    }),
+    columnHelper.accessor('warehouse.name', {
+        cell: info => info.getValue(),
+        header: () => <span>Warehouse Name</span>,
+    }),
+    columnHelper.accessor('warehouse.address', {
+        cell: info => info.getValue(),
+        header: () => <span>Warehouse Address</span>,
     }),
     columnHelper.accessor('lowStockThreshold', {
         cell: info => info.getValue(),
@@ -54,7 +62,7 @@ function StockThresholdListComponent() {
     React.useEffect(() => {
         const getStockThresholds = async () => {
             try {
-                const thresholds: StockThreshold[] = (await makeRequest<StockThreshold[]>('GET', '/stock-threshold')).data; 
+                const thresholds: StockThreshold[] = (await makeRequest<StockThreshold[]>('GET', '/stock-threshold')).data;
                 setData(thresholds);
             } catch (error) {
                 console.warn('Error fetching stock thresholds:', error);
@@ -75,7 +83,7 @@ function StockThresholdListComponent() {
     return (
         <ChakraProvider theme={theme}>
             <Box p={4}>
-                <Heading>Stock Thresholds</Heading>
+                <Heading fontSize={'2xl'} my={4}>Stock Thresholds</Heading>
                 <Box h={4} />
                 <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />

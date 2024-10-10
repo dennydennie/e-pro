@@ -12,7 +12,7 @@ import { FaPlus } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
-import { FactoryStaff } from '@/app/types/factory-staff';
+import { FactoryStaff, FactoryStaffDetail } from '@/app/types/factory-staff';
 import makeRequest from '@/app/services/backend';
 
 
@@ -20,23 +20,31 @@ const theme = extendTheme({
     styles: {
         global: {
             body: {
-                bg: 'blue.50', 
-                color: 'blue.800', 
+                bg: 'blue.50',
+                color: 'blue.800',
             },
         },
     },
 });
 
-const columnHelper = createColumnHelper<FactoryStaff>();
+const columnHelper = createColumnHelper<FactoryStaffDetail>();
 
 const columns = [
-    columnHelper.accessor('userId', {
+    columnHelper.accessor('user.name', {
         cell: info => info.getValue(),
-        header: () => <span>User ID</span>,
+        header: () => <span>User Name</span>,
     }),
-    columnHelper.accessor('factoryId', {
+    columnHelper.accessor('user.email', {
         cell: info => info.getValue(),
-        header: () => <span>Factory ID</span>,
+        header: () => <span>User Email</span>,
+    }),
+    columnHelper.accessor('user.phoneNumber', {
+        cell: info => info.getValue(),
+        header: () => <span>User Email</span>,
+    }),
+    columnHelper.accessor('factory.name', {
+        cell: info => info.getValue(),
+        header: () => <span>Factory Name</span>,
     }),
     columnHelper.accessor('jobTitle', {
         cell: info => info.getValue(),
@@ -49,13 +57,13 @@ const columns = [
 ];
 
 function FactoryStaffListComponent() {
-    const [data, setData] = React.useState<FactoryStaff[]>(() => []);
+    const [data, setData] = React.useState<FactoryStaffDetail[]>(() => []);
     const router = useRouter();
 
     React.useEffect(() => {
         const getFactoryStaff = async () => {
             try {
-                const staff: FactoryStaff[] = (await makeRequest<FactoryStaff[]>('GET', '/factory-staff')).data; 
+                const staff: FactoryStaffDetail[] = (await makeRequest<FactoryStaffDetail[]>('GET', '/factory-staff')).data;
                 console.log(staff);
                 setData(staff);
             } catch (error) {
@@ -76,7 +84,7 @@ function FactoryStaffListComponent() {
     return (
         <ChakraProvider theme={theme}>
             <Box p={4}>
-                <Heading>Factory Staff</Heading>
+                <Heading fontSize={'2xl'} my={4}>Factory Staff</Heading>
                 <Box h={4} />
                 <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />

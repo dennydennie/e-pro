@@ -72,7 +72,7 @@ function OrderDetailViewComponent({ orderId }:{orderId: string}) {
                 )}
                 {order ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>Order Details</Heading>
+                        <Heading fontSize={'2xl'} my={4}>Order Details</Heading>
                         <Divider />
                         <Text><strong>Customer ID:</strong> {order.customerId}</Text>
                         <Text><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</Text>

@@ -10,14 +10,14 @@ import FactoryForm from "@/app/components/pages/factory/FactoryFormComponent";
 export default function EditFactory() {
     const router = useRouter();
     const { slug: factoryId } = router.query;
-    const [initialData, setInitialData] = useState<Factory | undefined>(undefined);
+    const [initialData, setInitialData] = useState<FactorySummary | undefined>(undefined);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const fetchFactory = async () => {
             if (factoryId) {
                 try {
-                    const data: Factory = (await makeRequest<Factory>('GET', `/factory/${factoryId}`)).data;
+                    const data: FactorySummary = (await makeRequest<FactorySummary>('GET', `/factory/${factoryId}`)).data;
                     setInitialData(data);
                 } catch (error) {
                     console.error('Error fetching factory:', error);

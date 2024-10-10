@@ -86,12 +86,13 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ initialData }) => {
             console.error('Error occurred while processing the form:', error);
         }
 
-
     };
 
     return (
         <Box width="50%">
-            <Heading my={4}>Add Customer</Heading>
+            <Heading fontSize={'2xl'} my={4}>
+                {initialData ? 'Edit Customer' : 'Add Customer'}
+            </Heading>
             <Form
                 schema={customerSchema}
                 uiSchema={uiSchema}

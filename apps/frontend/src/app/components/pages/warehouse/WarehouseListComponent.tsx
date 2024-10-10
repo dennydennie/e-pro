@@ -45,10 +45,6 @@ const columns = [
         cell: info => info.getValue(),
         header: () => <span>Longitude</span>,
     }),
-    columnHelper.accessor('phoneNumber', {
-        cell: info => info.getValue(),
-        header: () => <span>Phone Number</span>,
-    }),
     columnHelper.accessor('maxCapacity', {
         cell: info => info.getValue(),
         header: () => <span>Max Capacity</span>,
@@ -83,7 +79,7 @@ function WarehouseListComponent() {
     return (
         <ChakraProvider theme={theme}>
             <Box p={4}>
-                <Heading>Warehouses</Heading>
+                <Heading fontSize={'2xl'} my={4}>Warehouses</Heading>
                 <Box h={4} />
                 <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />

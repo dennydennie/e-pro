@@ -89,13 +89,14 @@ const StockThresholdForm: React.FC<StockThresholdFormProps> = ({ initialData }) 
 
     return (
         <Box width="50%">
-            <Heading my={4}>Add Stock Threshold</Heading>
+            <Heading fontSize={'2xl'} my={4}>
+                {initialData ? 'Edit Threshold' : 'Add Threshold'}
+            </Heading>
             <Form
                 schema={stockThresholdSchema}
                 uiSchema={uiSchema}
                 formData={initialData}
                 onSubmit={handleSubmit}
-                liveValidate
                 validator={validator}
             >
                 <HStack mt={4} spacing={8}>

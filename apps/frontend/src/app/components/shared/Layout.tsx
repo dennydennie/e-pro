@@ -48,8 +48,8 @@ const Navbar = () => {
 
     const userRole = user?.role;
     const userLinks = userRole === 'admin'
-        ? ordinaryUserLinks
-        : adminLinks;
+        ? adminLinks
+        : ordinaryUserLinks;
 
 
     if (status === "loading") {

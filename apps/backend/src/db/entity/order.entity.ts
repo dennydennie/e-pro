@@ -6,7 +6,7 @@ import AbstractEntity from './abstract.entity';
 
 @Entity({ name: 'order' })
 export class OrderEntity extends AbstractEntity {
-    @Column()
+    @Column({ nullable: true })
     orderDate: Date;
 
     @Column()

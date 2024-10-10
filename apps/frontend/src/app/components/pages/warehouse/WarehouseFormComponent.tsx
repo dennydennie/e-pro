@@ -107,13 +107,14 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({ initialData }) => {
 
     return (
         <Box width="50%">
-            <Heading my={4}>Add Warehouse</Heading>
+            <Heading fontSize={'2xl'} my={4}>
+                {initialData ? 'Edit Warehouse' : 'Add Warehouse'}
+            </Heading>
             <Form
                 schema={warehouseSchema}
                 uiSchema={uiSchema}
                 formData={initialData}
                 onSubmit={handleSubmit}
-                liveValidate
                 validator={validator}
             >
                 <HStack mt={4} spacing={8}>

@@ -5,14 +5,13 @@ import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
 import { Factory } from "@/app/types/factory";
 import makeRequest from "@/app/services/backend";
-import { Customer } from "@/app/types/customer";
 import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/navigation";
 import { User } from "@/app/types/user";
 import { createFactorySchema } from "./factory-schema";
 
 interface FactoryFormProps {
-    initialData?: Factory;
+    initialData?: FactorySummary;
 }
 
 const uiSchema = {
@@ -101,13 +100,14 @@ const FactoryForm: React.FC<FactoryFormProps> = ({ initialData }) => {
 
     return (
         <Box width="50%">
-            <Heading my={4}>Add Factory</Heading>
+            <Heading fontSize={'2xl'} my={4}>
+                {initialData ? 'Edit Factory' : 'Add Factory'}
+            </Heading>
             <Form
                 schema={factorySchema}
                 uiSchema={uiSchema}
                 formData={initialData}
                 onSubmit={handleSubmit}
-                liveValidate
                 validator={validator}
             >
                 <HStack mt={4} spacing={8}>

@@ -72,7 +72,7 @@ function ProductDetailViewComponent({ productId }: {productId: string}) {
                 )}
                 {product ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>{product.name}</Heading>
+                        <Heading fontSize={'2xl'} my={4}>{product.name}</Heading>
                         <Divider />
                         <Text><strong>Description:</strong> {product.description}</Text>
                         <Text><strong>Price:</strong> ${product.price.toFixed(2)}</Text>

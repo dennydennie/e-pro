@@ -4,6 +4,7 @@ import {
     Column,
     ManyToOne,
     OneToMany,
+    JoinColumn,
 } from 'typeorm';
 import { FactoryEntity } from './factory.entity';
 import { StockThresholdEntity } from './stock-thershold.entity';
@@ -15,7 +16,8 @@ export class WarehouseEntity extends AbstractEntity {
     @Column()
     name: string;
 
-    @ManyToOne(() => FactoryEntity, (factory: FactoryEntity) => factory.warehouses)
+    @ManyToOne(() => FactoryEntity, (factory: FactoryEntity) => factory.warehouses, { eager: true })
+    @JoinColumn({ name: 'factoryId' })
     factory: FactoryEntity;
 
     @OneToMany(() => StockThresholdEntity, (stockThreshold: StockThresholdEntity) => stockThreshold.warehouse)
@@ -35,4 +37,7 @@ export class WarehouseEntity extends AbstractEntity {
 
     @Column({ default: 0 })
     maxCapacity: number;
+
+    @Column({ name: 'factoryId', nullable: true })
+    factoryId: string;
 }

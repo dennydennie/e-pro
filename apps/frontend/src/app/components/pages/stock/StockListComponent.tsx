@@ -29,13 +29,25 @@ const theme = extendTheme({
 const columnHelper = createColumnHelper<Stock>();
 
 const columns = [
-    columnHelper.accessor('productId', {
+    columnHelper.accessor('product.name', {
         cell: info => info.getValue(),
-        header: () => <span>Product ID</span>,
+        header: () => <span>Product</span>,
     }),
-    columnHelper.accessor('warehouseId', {
+    columnHelper.accessor('product.description', {
         cell: info => info.getValue(),
-        header: () => <span>Warehouse ID</span>,
+        header: () => <span>Product Description</span>,
+    }),
+    columnHelper.accessor('product.mass', {
+        cell: info => info.getValue(),
+        header: () => <span>Product Mass</span>,
+    }),
+    columnHelper.accessor('product.volume', {
+        cell: info => info.getValue(),
+        header: () => <span>Product Volume</span>,
+    }),
+    columnHelper.accessor('warehouse.name', {
+        cell: info => info.getValue(),
+        header: () => <span>Warehouse Name</span>,
     }),
     columnHelper.accessor('quantity', {
         cell: info => info.getValue(),
@@ -71,7 +83,7 @@ function StockListComponent() {
     return (
         <ChakraProvider theme={theme}>
             <Box p={4}>
-                <Heading>Stock</Heading>
+                <Heading fontSize={'2xl'} my={4}>Stock</Heading>
                 <Box h={4} />
                 <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />

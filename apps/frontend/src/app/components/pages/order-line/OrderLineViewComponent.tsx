@@ -72,10 +72,10 @@ function OrderLineDetailViewComponent({ orderLineId }: { orderLineId: string }) 
                 )}
                 {orderLine ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>Order Line Details</Heading>
+                        <Heading fontSize={'2xl'} my={4}>Order Line Details</Heading>
                         <Divider />
-                        <Text><strong>Order ID:</strong> {orderLine.orderId}</Text>
-                        <Text><strong>Product ID:</strong> {orderLine.productId}</Text>
+                        <Text><strong>Order:</strong> {orderLine.order.id}</Text>
+                        <Text><strong>Product:</strong> {orderLine.product.name}</Text>
                         <Text><strong>Quantity:</strong> {orderLine.quantity}</Text>
                         <HStack spacing={4}>
                             <Button colorScheme="blue" onClick={handleEdit}>Edit</Button>

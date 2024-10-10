@@ -4,6 +4,7 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { Order } from './domain/order';
 
 @ApiTags('Orders')
 @Controller('order')
@@ -27,7 +28,7 @@ export class OrderController {
   })
   @ApiResponse({ status: 200, description: 'The list of orders.' })
   @Get()
-  async findAll() {
+  async findAll(): Promise<Order[]> {
     return await this.orderService.findAll();
   }
 

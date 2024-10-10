@@ -1,5 +1,7 @@
+import { Factory } from "./factory";
+
 export interface Warehouse {
-    factoryId: string;
+    factory: Factory;
     id?: string;
     name: string;
     address: string;

@@ -14,7 +14,7 @@ import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
 import { Order } from '@/app/types/order'; 
 import makeRequest from '@/app/services/backend';
-
+import moment from 'moment';
 
 const theme = extendTheme({
     styles: {
@@ -30,16 +30,16 @@ const theme = extendTheme({
 const columnHelper = createColumnHelper<Order>();
 
 const columns = [
-    columnHelper.accessor('customerId', {
+    columnHelper.accessor('customer.name', {
         cell: info => info.getValue(),
-        header: () => <span>Customer ID</span>,
+        header: () => <span>Customer</span>,
     }),
     columnHelper.accessor('orderDate', {
-        cell: info => info.getValue(),
+        cell: info => moment(info.getValue()).format('YYYY MMM DD'),
         header: () => <span>Order Date</span>,
     }),
     columnHelper.accessor('expectedDeliveryDate', {
-        cell: info => info.getValue(),
+        cell: info => moment(info.getValue()).format('YYYY MMM DD'),
         header: () => <span>Expected Delivery Date</span>,
     }),
     columnHelper.accessor('notes', {
@@ -53,7 +53,7 @@ const columns = [
     columnHelper.accessor('status', {
         cell: info => info.getValue(),
         header: () => <span>Status</span>,
-    }),
+    }),,
 ];
 
 function OrderListComponent() {
@@ -77,13 +77,13 @@ function OrderListComponent() {
     };
 
     const handleRowClick = (id: string) => {
-        router.push(`order/edit/${id}`);
+        router.push(`order-lines/${id}`);
     };
 
     return (
         <ChakraProvider theme={theme}>
             <Box p={4}>
-                <Heading>Orders</Heading>
+                <Heading fontSize={'2xl'} my={4}>Orders</Heading>
                 <Box h={4} />
                 <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />

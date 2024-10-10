@@ -9,7 +9,7 @@ export const createWarehouseSchema = (factories: Factory[], id?: string) => {
             id: { type: "string", title: "ID", default: id },
             factoryId: {
                 type: ["string", "null"],
-                title: "Factory ID",
+                title: "Factory",
                 oneOf: withNullSelectOption(
                     _(factories)
                         .map((factory) => ({ const: factory.id, title: factory.name }))
@@ -21,7 +21,6 @@ export const createWarehouseSchema = (factories: Factory[], id?: string) => {
             address: { type: "string", title: "Address" },
             latitude: { type: "number", title: "Latitude" },
             longitude: { type: "number", title: "Longitude" },
-            phoneNumber: { type: "string", title: "Phone Number" },
             maxCapacity: { type: "number", title: "Max Capacity" },
         },
         required: ["factoryId", "name", "address", "latitude", "longitude", "phoneNumber", "maxCapacity"],

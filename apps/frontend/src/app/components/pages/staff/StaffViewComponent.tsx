@@ -72,7 +72,7 @@ function FactoryStaffDetailViewComponent({ staffId }: {staffId: string}) {
                 )}
                 {factoryStaff ? (
                     <VStack spacing={4} align='start'>
-                        <Heading>{factoryStaff.jobTitle}</Heading>
+                        <Heading fontSize={'2xl'} my={4}>{factoryStaff.jobTitle}</Heading>
                         <Divider />
                         <Text><strong>User ID:</strong> {factoryStaff.userId}</Text>
                         <Text><strong>Factory ID:</strong> {factoryStaff.factoryId}</Text>

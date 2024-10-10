@@ -9,12 +9,13 @@ export class StockThresholdEntity extends AbstractEntity {
   @ManyToOne(
     () => WarehouseEntity,
     (warehouse: WarehouseEntity) => warehouse.stockThresholds,
+    { eager: true }
   )
-  @JoinColumn()
+  @JoinColumn({ name: 'warehouseId' })
   warehouse: WarehouseEntity;
 
-  @ManyToOne(() => ProductEntity, (product: ProductEntity) => product.orderLines)
-  @JoinColumn()
+  @ManyToOne(() => ProductEntity, (product: ProductEntity) => product.id, { eager: true })
+  @JoinColumn({ name: 'productId' })
   product: ProductEntity;
 
   @Column()

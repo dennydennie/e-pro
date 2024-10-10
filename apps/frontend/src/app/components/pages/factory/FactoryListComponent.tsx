@@ -46,13 +46,9 @@ const columns = [
         cell: info => info.getValue(),
         header: () => <span>Longitude</span>,
     }),
-    columnHelper.accessor('userId', {
+    columnHelper.accessor('manager.name', {
         cell: info => info.getValue(),
-        header: () => <span>User ID</span>,
-    }),
-    columnHelper.accessor('phoneNumber', {
-        cell: info => info.getValue(),
-        header: () => <span>Phone Number</span>,
+        header: () => <span>Manager</span>,
     }),
 ];
 
@@ -83,7 +79,7 @@ function FactoryListComponent() {
     return (
         <ChakraProvider theme={theme}>
             <Box p={4}>
-                <Heading>Factories</Heading>
+                <Heading fontSize={'2xl'} my={4}>Factories</Heading>
                 <Box h={4} />
                 <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />

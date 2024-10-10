@@ -8,6 +8,7 @@ import { ProductRepository } from 'src/db/repository/product.repository';
 import { WarehouseRepository } from 'src/db/repository/warehouse.repository';
 import { IsNull, Not } from 'typeorm';
 import { StockSummary } from './domain/stock-summary';
+import { Stock } from './domain/stock';
 
 @Injectable()
 export class StockService {
@@ -56,8 +57,28 @@ export class StockService {
     return await this.stockRepository.save(newStock);
   }
 
-  async findAll(): Promise<StockEntity[]> {
-    return await this.stockRepository.find();
+  async findAll(): Promise<Stock[]> {
+    const stocks = await this.stockRepository.find();
+
+    const ops = stocks.map(async (stock) => {
+      const warehouse = await this.warehouseRepository.findOneBy({
+        id: stock.warehouseId,
+        deleted: IsNull(),
+      });
+
+      const product = await this.productRepository.findOneBy({
+        deleted: IsNull(),
+        id: stock.productId,
+      });
+
+      return Stock.fromEntity({
+        ...stock,
+        product,
+        warehouse
+      })
+    });
+
+    return Promise.all(ops)
   }
 
   async findAllStocksInWarehouse(warehouseId: string): Promise<StockSummary[]> {

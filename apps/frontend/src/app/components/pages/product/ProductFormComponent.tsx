@@ -8,6 +8,7 @@ import { Product } from "@/app/types/product";
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/navigation";
+import { handleResponse } from "@/app/utils/handle-api-response";
 
 interface ProductFormProps {
     initialData?: Product;
@@ -64,7 +65,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
     }
 
     const handleSubmit = async (data: IChangeEvent<Product>, event: React.FormEvent<HTMLFormElement>) => {
-
         if (!data.formData) {
             return;
         }
@@ -76,46 +76,30 @@ const ProductForm: React.FC<ProductFormProps> = ({ initialData }) => {
 
             if (formData.id !== '') {
                 response = await makeRequest<Product>('PATCH', `/product/${formData.id}`, formData);
-                if (response.status === 200) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
             } else {
                 response = await makeRequest<Product>('POST', '/product', { ...formData, id: undefined });
-                if (response.status === 201) {
-                    const success = "The operation was successful!";
-                    setMessageType('success');
-                    setMessage(success);
-                    setIsMessageModalOpen(true);
-                } else {
-                    const error = "Something went wrong!";
-                    setMessageType('error');
-                    setMessage(error);
-                    setIsMessageModalOpen(true);
-                }
             }
 
-        } catch (error) {
+            handleResponse(response.status, setMessage, setMessageType, setIsMessageModalOpen);
+
+        } catch (error: any) {
             console.error('Error occurred while processing the form:', error);
+            const errorMessage = `Error: ${error.message}`;
+            setMessageType('error');
+            setMessage(errorMessage);
+            setIsMessageModalOpen(true);
         }
     };
-
     return (
         <Box width="50%">
-            <Heading my={4}>Add Product</Heading>
+            <Heading fontSize={'2xl'} my={4}>
+                {initialData ? 'Edit Product' : 'Add Product'}
+            </Heading>
             <Form
                 schema={productSchema}
                 uiSchema={uiSchema}
                 formData={initialData}
                 onSubmit={handleSubmit}
-                liveValidate
                 validator={validator}
             >
                 <HStack mt={4} spacing={8}>

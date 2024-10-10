@@ -4,11 +4,13 @@ import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { StockThresholdService } from './stock-threshold.service';
 import { CreateStockThresholdDto } from './dto/create-stock-threshold.dto';
 import { UpdateStockThresholdDto } from './dto/update-stock-threshold.dto';
+import { StockThresholdDetail } from './domain/stock-threshold';
+import { StockThresholdSummary } from './domain/stock-threshold-summary';
 
 @ApiTags('Stock Thresholds')
 @Controller('stock-threshold')
 export class StockThresholdController {
-  constructor(private readonly stockThresholdService: StockThresholdService) {}
+  constructor(private readonly stockThresholdService: StockThresholdService) { }
 
   @ApiOperation({
     summary: 'Create a new stock threshold',
@@ -27,7 +29,7 @@ export class StockThresholdController {
   })
   @ApiResponse({ status: 200, description: 'The list of stock thresholds.' })
   @Get()
-  async findAll() {
+  async findAll(): Promise<StockThresholdDetail[]> {
     return await this.stockThresholdService.findAll();
   }
 
@@ -38,8 +40,10 @@ export class StockThresholdController {
   @ApiResponse({ status: 200, description: 'The stock threshold data.' })
   @ApiResponse({ status: 404, description: 'Stock threshold not found.' })
   @Get(':id')
-  async findOne(@Param('id') id: string) {
-    return await this.stockThresholdService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<StockThresholdSummary> {
+    const i = await this.stockThresholdService.findOne(id);
+    console.log(i);
+    return i;
   }
 
   @ApiOperation({
