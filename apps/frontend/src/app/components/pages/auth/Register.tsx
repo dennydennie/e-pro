@@ -127,9 +127,9 @@ export default function RegistrationForm() {
         const { formData } = data;
 
         try {
-            const response = await makeRequest<User>('PATCH', `/user`, formData);
+            const response = await makeRequest<User>('POST', `/user`, formData);
             if (response.status === 201) {
-                router.push('/login');
+                router.push('/auth/signin');
             }
         } catch (error) {
             setError("An unexpected error occurred. Please try again.");
