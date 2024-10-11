@@ -1,0 +1,14 @@
+<p>Hey {{userName}},</p>
+<p>Your order status has changed.</p>
+<p>The current status is now: <strong>{{orderStatus}}</strong>.</p>
+<p>Your order contains the following products:</p>
+<ul>
+  {{#each products}}
+    <li>
+      <strong>{{this.productName}}</strong> (Quantity: {{this.quantity}}, Price: ${{this.price.toFixed(2)}}, Total: ${{(this.price * this.quantity).toFixed(2)}})
+    </li>
+  {{/each}}
+</ul>
+<p>Grand Total: ${{grandTotal.toFixed(2)}}</p>
+<p>If you have any questions, feel free to reach out to our support team.</p>
+<p>Thank you for choosing us!</p>

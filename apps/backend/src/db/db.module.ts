@@ -21,6 +21,7 @@ import { StockThresholdRepository } from './repository/stock-threshold.repositor
 import { UserRepository } from './repository/user.repository';
 import { WarehouseRepository } from './repository/warehouse.repository';
 import { FactoryStaffEntity } from './entity/factory-staff.entity';
+import { StockSubscriber } from './subscriber/stock.subscriber';
 
 @Module({
     imports: [
@@ -47,7 +48,8 @@ import { FactoryStaffEntity } from './entity/factory-staff.entity';
         StockRepository,
         StockThresholdRepository,
         UserRepository,
-        WarehouseRepository
+        WarehouseRepository,
+        StockSubscriber
     ],
     exports: [
         CustomerRepository,

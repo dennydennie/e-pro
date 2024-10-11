@@ -15,6 +15,7 @@ import { OrderModule } from './order/order.module';
 import { OrderLineModule } from './order-line/order-line.module';
 import { FactoryStaffModule } from './factory-staff/factory-staff.module';
 import { AuthModule } from './auth/auth.module';
+import { EmailModule } from './email/email.module';
 
 export const TYPEORM_CONFIG = {
   imports: [ConfigModule],
@@ -57,6 +58,7 @@ export const TYPEORM_CONFIG = {
     OrderLineModule,
     FactoryStaffModule,
     AuthModule,
+    EmailModule,
   ],
   controllers: [],
   providers: [],
