@@ -14,6 +14,7 @@ import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
 import { FactoryStaff, FactoryStaffDetail } from '@/app/types/factory-staff';
 import makeRequest from '@/app/services/backend';
+import Loading from '../../shared/Loading';
 
 
 const theme = extendTheme({
@@ -59,19 +60,27 @@ const columns = [
 function FactoryStaffListComponent() {
     const [data, setData] = React.useState<FactoryStaffDetail[]>(() => []);
     const router = useRouter();
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const getFactoryStaff = async () => {
+            setLoading(true);
             try {
                 const staff: FactoryStaffDetail[] = (await makeRequest<FactoryStaffDetail[]>('GET', '/factory-staff')).data;
                 console.log(staff);
                 setData(staff);
             } catch (error) {
                 console.warn('Error fetching factory staff:', error);
+            } finally {
+                setLoading(false);
             }
         };
         getFactoryStaff();
     }, []);
+
+    if (!!loading) {
+        return <Loading />
+    }
 
     const handleCreate = () => {
         router.push('staff/add');

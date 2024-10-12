@@ -23,6 +23,6 @@ export const createWarehouseSchema = (factories: Factory[], id?: string) => {
             longitude: { type: "number", title: "Longitude" },
             maxCapacity: { type: "number", title: "Max Capacity" },
         },
-        required: ["factoryId", "name", "address", "latitude", "longitude", "phoneNumber", "maxCapacity"],
+        required: ["factoryId", "name", "address", "latitude", "longitude", "maxCapacity"],
     };
 };

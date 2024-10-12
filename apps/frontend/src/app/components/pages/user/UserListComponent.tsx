@@ -12,15 +12,17 @@ import { FaPlus } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
-import { User } from '@/app/types/user'; 
+import { User } from '@/app/types/user';
 import makeRequest from '@/app/services/backend';
+import Loading from '../../shared/Loading';
+import { useSession } from 'next-auth/react';
 
 const theme = extendTheme({
     styles: {
         global: {
             body: {
-                bg: 'blue.50', 
-                color: 'blue.800', 
+                bg: 'blue.50',
+                color: 'blue.800',
             },
         },
     },
@@ -58,19 +60,34 @@ const columns = [
 function UserListComponent() {
     const [data, setData] = React.useState<User[]>(() => []);
     const router = useRouter();
+    const [loading, setLoading] = React.useState(true);
+    const { data: userData, status } = useSession();
+    const user: User | undefined = userData?.user as User;
 
     React.useEffect(() => {
         const getUsers = async () => {
+            setLoading(true);
             try {
-                const users: User[] = (await makeRequest<User[]>('GET', '/user')).data;
+                let users: User[];
+                if (user.role === 'admin') {
+                    users = (await makeRequest<User[]>('GET', '/user')).data;
+                } else {
+                    users = (await makeRequest<User[]>('GET', `/user/${user.id}`)).data;
+                }
                 setData(users);
             } catch (error) {
                 console.warn('Error fetching users:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
         getUsers();
-    }, []);
+    }, [user.id, user.role]);
+
+    if (!!loading) {
+        return <Loading />
+    }
 
     const handleCreate = () => {
         router.push('user/add');
@@ -85,7 +102,11 @@ function UserListComponent() {
             <Box p={4}>
                 <Heading fontSize={'2xl'} my={4}>Users</Heading>
                 <Box h={4} />
-                <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
+                {
+                    user.role === 'admin' && (
+                        <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
+                    )
+                }
                 <CustomTable data={data} columns={columns} handleRowClick={handleRowClick} />
             </Box>
         </ChakraProvider>

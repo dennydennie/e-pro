@@ -12,16 +12,17 @@ import { FaPlus } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
-import { Order } from '@/app/types/order'; 
+import { Order } from '@/app/types/order';
 import makeRequest from '@/app/services/backend';
 import moment from 'moment';
+import Loading from '../../shared/Loading';
 
 const theme = extendTheme({
     styles: {
         global: {
             body: {
-                bg: 'blue.50', 
-                color: 'blue.800', 
+                bg: 'blue.50',
+                color: 'blue.800',
             },
         },
     },
@@ -53,24 +54,32 @@ const columns = [
     columnHelper.accessor('status', {
         cell: info => info.getValue(),
         header: () => <span>Status</span>,
-    }),,
+    }), ,
 ];
 
 function OrderListComponent() {
     const [data, setData] = React.useState<Order[]>(() => []);
     const router = useRouter();
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const getOrders = async () => {
+            setLoading(true);
             try {
-                const orders: Order[] = (await makeRequest<Order[]>('GET', '/order')).data; 
+                const orders: Order[] = (await makeRequest<Order[]>('GET', '/order')).data;
                 setData(orders);
             } catch (error) {
                 console.warn('Error fetching orders:', error);
+            } finally {
+                setLoading(false);
             }
         };
         getOrders();
     }, []);
+
+    if (!!loading) {
+        return <Loading />
+    }
 
     const handleCreate = () => {
         router.push('order/add');

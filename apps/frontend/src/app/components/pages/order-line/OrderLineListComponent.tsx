@@ -71,6 +71,8 @@ function OrderLineListComponent({ orderId }: OrderLineListComponentProps) {
 
     React.useEffect(() => {
         const fetchOrderLines = async () => {
+            setLoading(true);
+
             if (orderId) {
                 try {
                     const data = (await makeRequest<OrderLine[]>('GET', `/order-line/order/${orderId}`)).data;

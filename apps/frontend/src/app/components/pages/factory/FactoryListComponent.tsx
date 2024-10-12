@@ -14,6 +14,7 @@ import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
 import { Factory } from '@/app/types/factory';
 import makeRequest from '@/app/services/backend';
+import Loading from '../../shared/Loading';
 
 
 const theme = extendTheme({
@@ -55,18 +56,26 @@ const columns = [
 function FactoryListComponent() {
     const [data, setData] = React.useState<Factory[]>(() => []);
     const router = useRouter();
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const getFactories = async () => {
+            setLoading(true);
             try {
                 const factories: Factory[] = (await makeRequest<Factory[]>('GET', '/factory')).data;
                 setData(factories);
             } catch (error) {
                 console.warn('Error fetching factories:', error);
+            } finally {
+                setLoading(false);
             }
         };
         getFactories();
     }, []);
+
+    if (!!loading) {
+        return <Loading />
+    }
 
     const handleCreate = () => {
         router.push('factory/add');

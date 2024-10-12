@@ -113,7 +113,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}
-                onClose={() => setIsMessageModalOpen(false)}
+                onClose={() => {
+                    setIsMessageModalOpen(false);
+                }}
                 message={message}
                 type={messageType}
             />

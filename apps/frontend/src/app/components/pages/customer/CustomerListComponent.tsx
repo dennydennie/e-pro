@@ -109,6 +109,10 @@ function CustomerListComponent() {
         getCustomers();
     }, []);
 
+    if(!!loading){
+        return <Loading/>
+    }
+
     const handleCreate = () => {
         router.push('customer/add');
     };
@@ -116,10 +120,6 @@ function CustomerListComponent() {
     const handleRowClick = (id: string) => {
         router.push(`customer/edit/${id}`);
     };
-
-    if (!!loading) {
-        return <Loading />
-    }
 
     return (
         <ChakraProvider theme={theme}>

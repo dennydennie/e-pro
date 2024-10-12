@@ -12,15 +12,16 @@ import { FaPlus } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
-import { Warehouse } from '@/app/types/warehouse'; 
+import { Warehouse } from '@/app/types/warehouse';
 import makeRequest from '@/app/services/backend';
+import Loading from '../../shared/Loading';
 
 const theme = extendTheme({
     styles: {
         global: {
             body: {
-                bg: 'blue.50', 
-                color: 'blue.800', 
+                bg: 'blue.50',
+                color: 'blue.800',
             },
         },
     },
@@ -54,19 +55,27 @@ const columns = [
 function WarehouseListComponent() {
     const [data, setData] = React.useState<Warehouse[]>(() => []);
     const router = useRouter();
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const getWarehouses = async () => {
+            setLoading(true);
             try {
-                const warehouses: Warehouse[] = (await makeRequest<Warehouse[]>('GET', '/warehouse')).data; 
+                const warehouses: Warehouse[] = (await makeRequest<Warehouse[]>('GET', '/warehouse')).data;
                 setData(warehouses);
             } catch (error) {
                 console.warn('Error fetching warehouses:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
         getWarehouses();
     }, []);
+
+    if (!!loading) {
+        return <Loading />
+    }
 
     const handleCreate = () => {
         router.push('warehouse/add');

@@ -29,7 +29,7 @@ export class UserService {
     });
 
     if (!!availableByPhone) {
-      throw new BadRequestException('User with the provided number does not exist')
+      throw new BadRequestException('User with the provided number already exist');
     }
 
     const user = this.userRepository.create(createUserDto);

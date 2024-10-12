@@ -106,7 +106,11 @@ const StockForm: React.FC<StockFormProps> = ({ initialData }) => {
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}
-                onClose={() => setIsMessageModalOpen(false)}
+                onClose={() => {
+                    setIsMessageModalOpen(false)
+                    handleCancel();
+                }
+                }
                 message={message}
                 type={messageType}
             />

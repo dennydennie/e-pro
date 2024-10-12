@@ -22,6 +22,6 @@ export const createFactorySchema = (users: User[], id?: string) => {
                 ),
             },
         },
-        required: ["name", "address", "latitude", "longitude", "userId", "phoneNumber"],
+        required: ["name", "address", "latitude", "longitude", "userId"],
     };
 };

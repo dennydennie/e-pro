@@ -14,6 +14,7 @@ import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
 import makeRequest from '@/app/services/backend';
 import { StockThreshold } from '@/app/types/stock-threshold';
+import Loading from '../../shared/Loading';
 
 const theme = extendTheme({
     styles: {
@@ -58,19 +59,27 @@ const columns = [
 function StockThresholdListComponent() {
     const [data, setData] = React.useState<StockThreshold[]>(() => []);
     const router = useRouter();
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const getStockThresholds = async () => {
+            setLoading(true);
             try {
                 const thresholds: StockThreshold[] = (await makeRequest<StockThreshold[]>('GET', '/stock-threshold')).data;
                 setData(thresholds);
             } catch (error) {
                 console.warn('Error fetching stock thresholds:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
         getStockThresholds();
     }, []);
+
+    if (!!loading) {
+        return <Loading />
+    }
 
     const handleCreate = () => {
         router.push('threshold/add');

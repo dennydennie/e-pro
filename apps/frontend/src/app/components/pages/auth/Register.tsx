@@ -131,7 +131,9 @@ export default function RegistrationForm() {
             if (response.status === 201) {
                 router.push('/auth/signin');
             }
+
         } catch (error) {
+            console.log(error);
             setError("An unexpected error occurred. Please try again.");
         } finally {
             setLoading(false);

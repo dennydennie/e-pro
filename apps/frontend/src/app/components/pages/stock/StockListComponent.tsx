@@ -12,15 +12,16 @@ import { FaPlus } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
-import { Stock } from '@/app/types/stock'; 
+import { Stock } from '@/app/types/stock';
 import makeRequest from '@/app/services/backend';
+import Loading from '../../shared/Loading';
 
 const theme = extendTheme({
     styles: {
         global: {
             body: {
-                bg: 'blue.50', 
-                color: 'blue.800', 
+                bg: 'blue.50',
+                color: 'blue.800',
             },
         },
     },
@@ -58,19 +59,27 @@ const columns = [
 function StockListComponent() {
     const [data, setData] = React.useState<Stock[]>(() => []);
     const router = useRouter();
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const getStocks = async () => {
+            setLoading(true);
             try {
-                const stocks: Stock[] = (await makeRequest<Stock[]>('GET', '/stock')).data; 
+                const stocks: Stock[] = (await makeRequest<Stock[]>('GET', '/stock')).data;
                 setData(stocks);
             } catch (error) {
                 console.warn('Error fetching stocks:', error);
+            } finally {
+                setLoading(false);
             }
         };
 
         getStocks();
     }, []);
+
+    if (!!loading) {
+        return <Loading />
+    }
 
     const handleCreate = () => {
         router.push('stock/add');

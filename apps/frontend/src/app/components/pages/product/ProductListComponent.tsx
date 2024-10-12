@@ -12,16 +12,17 @@ import { FaPlus } from 'react-icons/fa';
 import { useRouter } from 'next/navigation';
 import CustomButton from '../../shared/CustomButton';
 import CustomTable from '../../shared/CustomTable';
-import { Product } from '@/app/types/product'; 
+import { Product } from '@/app/types/product';
 import makeRequest from '@/app/services/backend';
+import Loading from '../../shared/Loading';
 
 
 const theme = extendTheme({
     styles: {
         global: {
             body: {
-                bg: 'blue.50', 
-                color: 'blue.800', 
+                bg: 'blue.50',
+                color: 'blue.800',
             },
         },
     },
@@ -67,18 +68,26 @@ const columns = [
 function ProductListComponent() {
     const [data, setData] = React.useState<Product[]>(() => []);
     const router = useRouter();
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const getProducts = async () => {
+            setLoading(true);
             try {
-                const products: Product[] = (await makeRequest<Product[]>('GET', '/product')).data; 
+                const products: Product[] = (await makeRequest<Product[]>('GET', '/product')).data;
                 setData(products);
             } catch (error) {
                 console.warn('Error fetching products:', error);
+            } finally {
+                setLoading(false)
             }
         };
         getProducts();
     }, []);
+
+    if (!!loading) {
+        return <Loading />
+    }
 
     const handleCreate = () => {
         router.push('product/add');

@@ -128,7 +128,11 @@ const WarehouseForm: React.FC<WarehouseFormProps> = ({ initialData }) => {
             </Form>
             <MessageModal
                 isOpen={isMessageModalOpen}
-                onClose={() => setIsMessageModalOpen(false)}
+                onClose={() => {
+                    setIsMessageModalOpen(false);
+                    handleCancel();
+                }
+                }
                 message={message}
                 type={messageType}
             />
