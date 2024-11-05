@@ -1,6 +1,8 @@
 /* eslint-disable prettier/prettier */
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
+import { OrderLine } from 'src/order-line/domain/order-line';
+import { PaymentDetail } from 'src/payment/domain/payment';
 import { Product } from 'src/product/domain/product';
 
 @Injectable()
@@ -23,6 +25,35 @@ export class EmailService {
         quantityInStock,
       },
     });
+  }
+
+  async sendPaymentReceivedEmail(
+    payment: PaymentDetail,
+    orderLines: OrderLine[],
+    grandTotal: number
+  ) {
+    console.log(payment);
+    try {
+      await this.mailerService.sendMail({
+        to: payment.customer.email,
+        subject: 'Payment Received',
+        template: './payment-received',
+        context: {
+          userName: payment.customer.name,
+          paymentAmount: payment.amount,
+          currency: payment.currency,
+          paymentMethod: payment.method,
+          paymentStatus: payment.status,
+          orderId: payment.order.id,
+          orderStatus: payment.order.status,
+          orderLines,
+          grandTotal,
+        },
+      });
+    } catch (error) {
+      console.log('Error sending email', error)
+    }
+
   }
 
   async sendOrderStatusChangeEmail(

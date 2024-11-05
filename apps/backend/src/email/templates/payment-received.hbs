@@ -1,0 +1,25 @@
+<p>Hey {{userName}},</p>
+<p>We have successfully received your payment!</p>
+<p>Here are the details of your payment:</p>
+<ul>
+  <li><strong>Payment Amount:</strong> ${{paymentAmount}}</li>
+  <li><strong>Currency:</strong> {{currency}}</li>
+  <li><strong>Payment Method:</strong> {{paymentMethod}}</li>
+  <li><strong>Status:</strong> {{paymentStatus}}</li>
+</ul>
+
+<p>Your order details are as follows:</p>
+<p><strong>Order ID:</strong> {{orderId}}</p>
+<p><strong>Order Status:</strong> {{orderStatus}}</p>
+<p>Your order contains the following products:</p>
+<ul>
+  {{#each orderLine}}
+    <li>
+      <strong>{{this.orderLine.product.name}}</strong> (Quantity: {{this.quantity}}, Price: ${{this.orderLine.product.price}}, Total: ${{(this.orderLine.product.price * this.quantity)}})
+    </li>
+  {{/each}}
+</ul>
+<p><strong>Grand Total:</strong> ${{grandTotal.toFixed(2)}}</p>
+
+<p>If you have any questions or concerns, feel free to reach out to our support team.</p>
+<p>Thank you for choosing us!</p>

@@ -1,26 +1,15 @@
 import React, { useEffect } from 'react';
 import { Box, Flex, Heading, Stack, Icon } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { FaPowerOff, FaUser, FaUsers, FaIndustry, FaWarehouse, FaBox, FaClipboardList, FaUserCog, FaChartBar, FaShoppingCart, FaUserTie } from 'react-icons/fa';
+import { FaPowerOff, FaUser, FaUsers, FaIndustry, FaWarehouse, FaBox, FaClipboardList, FaUserCog, FaChartBar, FaShoppingCart, FaUserTie, FaMoneyBillWave } from 'react-icons/fa';
 import { signOut, useSession } from 'next-auth/react';
 import Loading from './Loading';
-import { User } from '@/app/types/user';
 import { CustomLinkType } from '@/app/types/custom-link';
 import Link from 'next/link';
+import { User } from '@/app/types/user';
 
-const Navbar = () => {
+const Navbar = ({ user }:{ user: User}) => {
     const router = useRouter();
-
-    const { data, status } = useSession();
-    const user: User | undefined = data?.user as User;
-
-    useEffect(() => {
-        const exemptRoutes = ['/auth/signin', '/auth/new-user'];
-
-        if (status === "unauthenticated" && !exemptRoutes.includes(router.pathname)) {
-            router.push("/auth/signin");
-        }
-    }, [status, router.pathname, router]);
 
     const handleLogout = async () => {
         await signOut();
@@ -32,6 +21,7 @@ const Navbar = () => {
         { title: 'Warehouses', basePath: '/warehouse', icon: FaWarehouse },
         { title: 'Products', basePath: '/product', icon: FaBox },
         { title: 'Stocks', basePath: '/stock', icon: FaClipboardList },
+        { title: 'Payments', basePath: '/payment', icon: FaMoneyBillWave },
         { title: 'Users', basePath: '/user', icon: FaUserCog },
         { title: 'Thresholds', basePath: '/threshold', icon: FaChartBar },
         { title: 'Orders', basePath: '/order', icon: FaShoppingCart },
@@ -42,6 +32,7 @@ const Navbar = () => {
         { title: 'Customers', basePath: '/customer', icon: FaUsers },
         { title: 'Orders', basePath: '/order', icon: FaShoppingCart },
         { title: 'Stocks', basePath: '/stock', icon: FaClipboardList },
+        { title: 'Payments', basePath: '/payment', icon: FaMoneyBillWave },
         { title: 'Products', basePath: '/product', icon: FaBox },
         { title: 'Profile', basePath: '/user', icon: FaUser },
     ];
@@ -51,14 +42,13 @@ const Navbar = () => {
         ? adminLinks
         : ordinaryUserLinks;
 
-
     if (status === "loading") {
         return <Loading />;
     }
 
     return (
         <Flex as="nav" position="fixed" top="0" left="0" w="100%" bg="blue.600" p={6} zIndex="1000" boxShadow="md" alignItems="center">
-            <Heading as="a" href="/" color="white" mr="auto">E PROcure</Heading>
+            <Heading as="a" href="/" color="white" mr="auto">Advanced SCM</Heading>
             <Stack direction="row" spacing={[8, 6]}>
                 {userLinks.map((link, index) => (
                     <Link key={index} href={link.basePath} passHref>
@@ -91,7 +81,7 @@ const Navbar = () => {
                         as="a"
                         onClick={() => handleLogout()}
                     >
-                        <Icon as={FaPowerOff} boxSize={5} mx={2} />
+                        <Icon as={FaPowerOff} boxSize={4} mt={1} />
                     </Flex>
                 </Link>
             </Stack>
@@ -113,9 +103,24 @@ const MainContent = ({ children }: any) => {
 };
 
 const Layout = ({ children }: any) => {
+    const { data, status } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        const exemptRoutes = ['/auth/signin', '/auth/new-user'];
+
+        if (status === "unauthenticated" && !exemptRoutes.includes(router.pathname)) {
+            router.replace('/auth/signin');
+        }
+    }, [status, router]);
+
+    if (status === "loading") {
+        return <Loading />;
+    }
+
     return (
         <>
-            <Navbar />
+            <Navbar user={data?.user! as User} />
             <MainContent>
                 {children}
             </MainContent>

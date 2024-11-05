@@ -1,69 +1,64 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Button, HStack, Heading } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
-import { User } from "@/app/types/user";
-import { userSchema } from "./user-schema";
+import { createPaymentSchema } from "./payment-schema";
 import { IChangeEvent } from "@rjsf/core";
 import validator from '@rjsf/validator-ajv8';
 import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/router";
 import { handleResponse } from "@/app/utils/handle-api-response";
+import { Order } from "@/app/types/order";
+import { Payment } from "@/app/types/payment";
 
-interface UserFormProps {
-    initialData?: User;
+interface PaymentFormProps {
+    initialData?: Payment;
 }
 
 const uiSchema = {
-    name: {
-        "ui:widget": "text"
-    },
-    email: {
-        "ui:widget": "email"
-    },
-    password: {
-        "ui:widget": "password"
-    },
-    phoneNumber: {
-        "ui:options": {
-            "inputType": "tel"
-        }
-    },
-    role: {
+    id: { "ui:widget": "hidden" },
+    orderId: {
         "ui:widget": "select",
-        "ui:placeholder": "Select a role",
-        "ui:options": {
-            enumOptions: [
-                { value: "admin", label: "Admin" },
-                { value: "manager", label: "Manager" },
-                { value: "staff", label: "Staff" }
-            ]
-        }
     },
-    address: {
-        "ui:widget": "textarea"
+    currency: {
+        "ui:widget": "select",
     },
-    department: {
-        "ui:widget": "text"
-    },
-    id: {
-        "ui:widget": "hidden"
-    }
+    amount: { "ui:widget": "updown" },
 };
 
-const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
+const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
     const router = useRouter();
+    const [orders, setOrders] = useState<Order[]>([]);
 
-    if (!!initialData) {
-        userSchema.properties.id.default = initialData?.id as string;
-    }
+    useEffect(() => {
+        const fetchFormData = async () => {
+            try {
+
+                const orderResponse = await makeRequest<Order[]>('GET', '/order');
+                setOrders(orderResponse.data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        fetchFormData();
+    }, []);
+
+    const id = initialData?.id ?? "";
+    const paymentSchema = createPaymentSchema(orders, id);
+
     const handleCancel = () => {
-        router.push('/user');
+        router.push('/order');
+    };
+
+    const handleAfterSave = () => {
+        router.push(`/payment/view/${id}`);
     }
-    const handleSubmit = async (data: IChangeEvent<User>, event: React.FormEvent<HTMLFormElement>) => {
+
+    const handleSubmit = async (data: IChangeEvent<Payment>, event: React.FormEvent<HTMLFormElement>) => {
         if (!data.formData) {
             return;
         }
@@ -74,9 +69,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
             let response;
 
             if (formData.id !== "") {
-                response = await makeRequest<User>('PATCH', `/user/${formData.id}`, formData);
+                response = await makeRequest<Payment>('PATCH', `/payment/${formData.id}`, formData);
             } else {
-                response = await makeRequest<User>('POST', '/user', { ...formData, id: undefined });
+                response = await makeRequest<Payment>('POST', '/payment', { ...formData, id: undefined });
             }
 
             handleResponse(response.status, setMessage, setMessageType, setIsMessageModalOpen);
@@ -93,10 +88,10 @@ const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
     return (
         <Box width="50%">
             <Heading fontSize={'2xl'} my={4}>
-                {initialData ? 'Edit User' : 'Add User'}
+                {initialData ? 'Edit Payment' : 'Add Payment'}
             </Heading>
             <Form
-                schema={userSchema}
+                schema={paymentSchema}
                 uiSchema={uiSchema}
                 formData={initialData}
                 onSubmit={handleSubmit}
@@ -115,8 +110,9 @@ const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
                 isOpen={isMessageModalOpen}
                 onClose={() => {
                     setIsMessageModalOpen(false);
-                    handleCancel();
-                }}
+                    handleAfterSave();
+                }
+                }
                 message={message}
                 type={messageType}
             />
@@ -124,4 +120,4 @@ const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
     );
 };
 
-export default UserForm;
+export default PaymentForm;

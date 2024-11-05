@@ -1,14 +1,13 @@
-import { TableContainer, Table, Thead, Tr, Th, Tbody, Td, Tfoot } from "@chakra-ui/react"
-import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+import { TableContainer, Table, Thead, Tr, Th, Tbody, Td, Tfoot, Box, Text } from "@chakra-ui/react";
+import { ColumnDef, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table";
 
 export interface CustomTableProps {
     data: any[];
-    columns: ColumnDef<any, any>[]
-    handleRowClick: any
+    columns: ColumnDef<any, any>[];
+    handleRowClick: (id: string) => void;
 }
 
 const CustomTable = ({ data, columns, handleRowClick }: CustomTableProps) => {
-
     const table = useReactTable({
         data,
         columns,
@@ -32,19 +31,25 @@ const CustomTable = ({ data, columns, handleRowClick }: CustomTableProps) => {
                     ))}
                 </Thead>
                 <Tbody>
-                    {
-                        table.getRowModel().rows.map((row) => {
-                            return (
-                                <Tr key={row.id} onClick={() => handleRowClick(row.original.id)} cursor="pointer">
-                                    {row.getVisibleCells().map((cell) => (
-                                        <Td key={cell.id}>
-                                            {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                                        </Td>
-                                    ))}
-                                </Tr>
-                            )
-                        })
-                    }
+                    {table.getRowModel().rows.length === 0 ? (
+                        <Tr>
+                            <Td colSpan={columns.length} textAlign="center">
+                                <Box p={4}>
+                                    <Text color="gray.500">No data available</Text>
+                                </Box>
+                            </Td>
+                        </Tr>
+                    ) : (
+                        table.getRowModel().rows.map((row) => (
+                            <Tr key={row.id} onClick={() => handleRowClick(row.original.id)} cursor="pointer">
+                                {row.getVisibleCells().map((cell) => (
+                                    <Td key={cell.id}>
+                                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                    </Td>
+                                ))}
+                            </Tr>
+                        ))
+                    )}
                 </Tbody>
                 <Tfoot>
                     {table.getFooterGroups().map((footerGroup) => (
@@ -61,7 +66,7 @@ const CustomTable = ({ data, columns, handleRowClick }: CustomTableProps) => {
                 </Tfoot>
             </Table>
         </TableContainer>
-    )
+    );
 }
 
 export default CustomTable;

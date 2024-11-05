@@ -74,7 +74,7 @@ function OrderDetailViewComponent({ orderId }:{orderId: string}) {
                     <VStack spacing={4} align='start'>
                         <Heading fontSize={'2xl'} my={4}>Order Details</Heading>
                         <Divider />
-                        <Text><strong>Customer ID:</strong> {order.customerId}</Text>
+                        <Text><strong>Customer:</strong> {order.customer.name}</Text>
                         <Text><strong>Order Date:</strong> {new Date(order.orderDate).toLocaleDateString()}</Text>
                         <Text><strong>Expected Delivery Date:</strong> {new Date(order.expectedDeliveryDate).toLocaleDateString()}</Text>
                         <Text><strong>Nature:</strong> {order.nature}</Text>

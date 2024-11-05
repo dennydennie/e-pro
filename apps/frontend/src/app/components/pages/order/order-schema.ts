@@ -6,7 +6,7 @@ export const createOrderSchema = (customers: Customer[], id?: string) => {
     return {
         type: "object",
         properties: {
-            id: { type: "string", title: "ID", default: '' },
+            id: { type: "string", title: "ID", default: id },
             customerId: {
                 title: "Customer",
                 type: ["string", "null"],

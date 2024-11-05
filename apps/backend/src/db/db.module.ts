@@ -22,6 +22,8 @@ import { UserRepository } from './repository/user.repository';
 import { WarehouseRepository } from './repository/warehouse.repository';
 import { FactoryStaffEntity } from './entity/factory-staff.entity';
 import { StockSubscriber } from './subscriber/stock.subscriber';
+import PaymentEntity from './entity/payment.entity';
+import { PaymentRepository } from './repository/payment.repository';
 
 @Module({
     imports: [
@@ -36,6 +38,7 @@ import { StockSubscriber } from './subscriber/stock.subscriber';
             StockEntity,
             UserEntity,
             WarehouseEntity,
+            PaymentEntity,
         ]),
     ],
     providers: [
@@ -49,7 +52,8 @@ import { StockSubscriber } from './subscriber/stock.subscriber';
         StockThresholdRepository,
         UserRepository,
         WarehouseRepository,
-        StockSubscriber
+        PaymentRepository,
+        StockSubscriber,
     ],
     exports: [
         CustomerRepository,
@@ -61,6 +65,7 @@ import { StockSubscriber } from './subscriber/stock.subscriber';
         StockRepository,
         StockThresholdRepository,
         UserRepository,
+        PaymentRepository,
         WarehouseRepository
     ],
 })

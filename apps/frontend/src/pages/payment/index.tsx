@@ -2,7 +2,7 @@
 import PaymentListComponent from "@/app/components/pages/payment/PaymentListComponent";
 import React from "react";
 
-export default function Payments() {
+export default function Products() {
     return (
         <PaymentListComponent />
     );

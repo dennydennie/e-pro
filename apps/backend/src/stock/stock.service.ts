@@ -9,6 +9,7 @@ import { WarehouseRepository } from 'src/db/repository/warehouse.repository';
 import { IsNull, Not } from 'typeorm';
 import { StockSummary } from './domain/stock-summary';
 import { Stock } from './domain/stock';
+import { OrderEntity } from 'src/db/entity/order.entity';
 
 @Injectable()
 export class StockService {
@@ -260,5 +261,31 @@ export class StockService {
   async remove(id: string): Promise<void> {
     const stock = await this.findOne(id);
     await this.stockRepository.remove(stock);
+  }
+
+  async removeStocksFromOrder(order: OrderEntity) {
+    console.log('removing stocks for ', order);
+    // for (const orderLine of order.orderLines) {
+    //   const { productId, quantity } = orderLine;
+
+    //   const stock = await this.stockRepository.findOne({
+    //     where: {
+    //       productId: productId,
+    //       warehouseId: order.warehouseId, // Assuming order has a warehouseId
+    //     },
+    //   });
+
+    //   if (!stock) {
+    //     throw new NotFoundException(`Stock not found for product ID ${productId} in warehouse ${order.warehouseId}`);
+    //   }
+
+    //   if (stock.quantity < quantity) {
+    //     throw new BadRequestException(`Insufficient stock for product ID ${productId}. Available: ${stock.quantity}, Requested: ${quantity}`);
+    //   }
+
+    //   stock.quantity -= quantity;
+
+    //   await this.stockRepository.save(stock);
+    // }
   }
 }

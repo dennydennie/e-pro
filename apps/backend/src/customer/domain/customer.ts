@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { CustomerEntity } from 'src/db/entity/customer.entity'; // Adjust the import path as needed
+import { CustomerEntity } from 'src/db/entity/customer.entity';
 
 export class Customer {
     readonly id: string;
@@ -13,14 +13,14 @@ export class Customer {
 
     static fromEntity(entity: CustomerEntity): Customer {
         return {
-            id: entity.id,
-            name: entity.name,
-            email: entity.email,
-            contactPerson: entity.contactPerson,
-            contactPersonMobile: entity.contactPersonMobile,
-            shippingAddress: entity.shippingAddress,
-            shippingLatitude: entity.shippingLatitude,
-            shippingLongitude: entity.shippingLongitude,
+            id: entity?.id,
+            name: entity?.name,
+            email: entity?.email,
+            contactPerson: entity?.contactPerson,
+            contactPersonMobile: entity?.contactPersonMobile,
+            shippingAddress: entity?.shippingAddress,
+            shippingLatitude: entity?.shippingLatitude,
+            shippingLongitude: entity?.shippingLongitude,
         };
     }
 }

@@ -6,7 +6,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('E Procure')
+    .setTitle('Advanced SCM')
     .setDescription('Procurement Manager')
     .setVersion('1.0')
     .build();

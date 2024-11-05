@@ -64,6 +64,11 @@ function UserListComponent() {
     const { data: userData, status } = useSession();
     const user: User | undefined = userData?.user as User;
 
+    if (!user) {
+        return <Loading />
+    }
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     React.useEffect(() => {
         const getUsers = async () => {
             setLoading(true);
@@ -72,7 +77,7 @@ function UserListComponent() {
                 if (user.role === 'admin') {
                     users = (await makeRequest<User[]>('GET', '/user')).data;
                 } else {
-                    users = (await makeRequest<User[]>('GET', `/user/${user.id}`)).data;
+                    users = [(await makeRequest<User>('GET', `/user/${user.id}`)).data];
                 }
                 setData(users);
             } catch (error) {
@@ -83,7 +88,7 @@ function UserListComponent() {
         };
 
         getUsers();
-    }, [user.id, user.role]);
+    }, [user?.id, user?.role]);
 
     if (!!loading) {
         return <Loading />
@@ -103,7 +108,7 @@ function UserListComponent() {
                 <Heading fontSize={'2xl'} my={4}>Users</Heading>
                 <Box h={4} />
                 {
-                    user.role === 'admin' && (
+                    user?.role === 'admin' && (
                         <CustomButton type={undefined} icon={FaPlus} action={handleCreate} />
                     )
                 }

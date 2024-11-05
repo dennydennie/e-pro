@@ -162,7 +162,7 @@ export default function RegistrationForm() {
                         size="lg"
                         textColor={"blue.600"}
                     >
-                        E PROcure
+                        Advanced SCM
                     </Heading>
                     <Heading
                         textAlign={"center"}
