@@ -7,6 +7,7 @@ import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import Link from 'next/link';
 import { BlueLink } from './Register';
+import Image from 'next/image';
 
 const schema = {
     type: "object",
@@ -87,6 +88,15 @@ export default function LoginForm() {
                     boxShadow="md"
                     backgroundColor="white"
                 >
+                    <Box textAlign="center" mb={4}>
+                        <Image
+                            src="/logo.png"
+                            alt="Advanced SCM Logo"
+                            width={150}
+                            height={150}
+                            priority
+                        />
+                    </Box>
                     <Heading
                         textAlign={"center"}
                         my={4}

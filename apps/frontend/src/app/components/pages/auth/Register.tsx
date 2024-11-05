@@ -8,6 +8,7 @@ import validator from '@rjsf/validator-ajv8';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import Image from 'next/image';
 
 export const BlueLink = styled.a`
   color: blue;
@@ -20,26 +21,40 @@ const schema = {
             type: "string",
             title: "Name",
             minLength: 2,
-            maxLength: 50
+            maxLength: 50,
+            pattern: "^[a-zA-Z ]+$",
+            errorMessage: {
+                pattern: "Name should only contain letters and spaces"
+            }
         },
         email: {
             type: "string",
             title: "Email",
             format: "email",
             minLength: 6,
-            maxLength: 50
+            maxLength: 50,
+            errorMessage: {
+                format: "Please enter a valid email address"
+            }
         },
         password: {
             type: "string",
             title: "Password",
-            minLength: 6,
-            maxLength: 30
+            minLength: 8,
+            maxLength: 30,
+            pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
+            errorMessage: {
+                pattern: "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
+                minLength: "Password must be at least 8 characters long"
+            }
         },
         phoneNumber: {
             type: "string",
             title: "Phone Number",
-            minLength: 10,
-            maxLength: 15
+            pattern: "^\\+263[0-9]{9}$",
+            errorMessage: {
+                pattern: "Phone number must start with +263 followed by 9 digits"
+            }
         },
         role: {
             type: "string",
@@ -59,12 +74,20 @@ const schema = {
         address: {
             type: "string",
             title: "Address",
-            maxLength: 100
+            minLength: 5,
+            maxLength: 100,
+            errorMessage: {
+                minLength: "Address must be at least 5 characters long"
+            }
         },
         department: {
             type: "string",
             title: "Department",
-            maxLength: 50
+            minLength: 2,
+            maxLength: 50,
+            errorMessage: {
+                minLength: "Department must be at least 2 characters long"
+            }
         },
     },
     required: ["name", "email", "password", "phoneNumber"]
@@ -72,26 +95,26 @@ const schema = {
 
 const uiSchema = {
     name: {
-        "ui:placeholder": "Enter your name",
+        "ui:placeholder": "Enter your name (letters only)",
         "ui:options": {
             label: null,
         }
     },
     email: {
-        "ui:placeholder": "Enter your email",
+        "ui:placeholder": "Enter your email (e.g., user@example.com)",
         "ui:options": {
             label: null,
         }
     },
     password: {
         "ui:widget": "password",
-        "ui:placeholder": "Enter password",
+        "ui:placeholder": "Min 8 chars, include A-Z, a-z, 0-9, @$!%*?&",
         "ui:options": {
             label: null,
         }
     },
     phoneNumber: {
-        "ui:placeholder": "Enter your phone number",
+        "ui:placeholder": "+263xxxxxxxxx",
         "ui:options": {
             label: null,
         }
@@ -156,6 +179,15 @@ export default function RegistrationForm() {
                     boxShadow="md"
                     backgroundColor="white"
                 >
+                    <Box textAlign="center" mb={4}>
+                        <Image
+                            src="/logo.png"
+                            alt="Advanced SCM Logo"
+                            width={150}
+                            height={150}
+                            priority
+                        />
+                    </Box>
                     <Heading
                         textAlign={"center"}
                         my={2}

@@ -7,6 +7,7 @@ import Loading from './Loading';
 import { CustomLinkType } from '@/app/types/custom-link';
 import Link from 'next/link';
 import { User } from '@/app/types/user';
+import Image from 'next/image';
 
 const Navbar = ({ user }:{ user: User}) => {
     const router = useRouter();
@@ -47,8 +48,17 @@ const Navbar = ({ user }:{ user: User}) => {
     }
 
     return (
-        <Flex as="nav" position="fixed" top="0" left="0" w="100%" bg="blue.600" p={6} zIndex="1000" boxShadow="md" alignItems="center">
-            <Heading as="a" href="/" color="white" mr="auto">Advanced SCM</Heading>
+        <Flex as="nav" position="fixed" top="0" left="0" w="100%" bg="blue.600" px={2} zIndex="1000" boxShadow="md" alignItems="center">
+            <Flex alignItems="center" mr="auto" align="end">
+                <Image
+                    src="/img/logo.png"
+                    alt="Logo"
+                    width={100}
+                    height={100}
+                    style={{ marginRight: '24px' }}
+                />
+                <Heading as="a" href="/" color="white">Advanced SCM</Heading>
+            </Flex>
             <Stack direction="row" spacing={[8, 6]}>
                 {userLinks.map((link, index) => (
                     <Link key={index} href={link.basePath} passHref>
