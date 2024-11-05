@@ -179,15 +179,15 @@ export default function RegistrationForm() {
                     boxShadow="md"
                     backgroundColor="white"
                 >
-                    <Box textAlign="center" mb={4}>
+                             <Center mb={2}>
                         <Image
-                            src="/logo.png"
+                            src="/img/logo.png"
                             alt="Advanced SCM Logo"
                             width={150}
                             height={150}
                             priority
                         />
-                    </Box>
+                    </Center>
                     <Heading
                         textAlign={"center"}
                         my={2}

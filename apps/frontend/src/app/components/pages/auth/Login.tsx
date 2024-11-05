@@ -88,15 +88,15 @@ export default function LoginForm() {
                     boxShadow="md"
                     backgroundColor="white"
                 >
-                    <Box textAlign="center" mb={4}>
+                    <Center mb={4}>
                         <Image
-                            src="/logo.png"
+                            src="/img/logo.png"
                             alt="Advanced SCM Logo"
                             width={150}
                             height={150}
                             priority
                         />
-                    </Box>
+                    </Center>
                     <Heading
                         textAlign={"center"}
                         my={4}
@@ -132,7 +132,7 @@ export default function LoginForm() {
                     </Form>
                     <Text textAlign="center" mt={4}>
                         Need an account ? {" "} <Link href="/auth/register" color="blue">
-                        <BlueLink>Register</BlueLink>
+                            <BlueLink>Register</BlueLink>
                         </Link>
                     </Text>
                 </Box>
