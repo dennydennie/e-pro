@@ -1,4 +1,4 @@
-import { Button, Box, Stack, Heading, Center, Text } from '@chakra-ui/react';
+import { Button, Box, Stack, Heading, Center, Text, useToast } from '@chakra-ui/react';
 import Form from '@rjsf/chakra-ui';
 import { IChangeEvent } from '@rjsf/core';
 import validator from '@rjsf/validator-ajv8';
@@ -46,6 +46,7 @@ const uiSchema = {
 
 export default function LoginForm() {
     const router = useRouter();
+    const toast = useToast();
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -62,11 +63,36 @@ export default function LoginForm() {
 
             if (result?.error) {
                 setError(result.error);
+                toast({
+                    title: 'Login Failed',
+                    description: result.error,
+                    status: 'error',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top'
+                });
             } else {
+                toast({
+                    title: 'Login Successful',
+                    description: 'Redirecting to dashboard...',
+                    status: 'success',
+                    duration: 3000,
+                    isClosable: true,
+                    position: 'top'
+                });
                 router.push('/');
             }
         } catch (error) {
-            setError("An unexpected error occurred. Please try again.");
+            const errorMessage = "An unexpected error occurred. Please try again.";
+            setError(errorMessage);
+            toast({
+                title: 'Error',
+                description: errorMessage,
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top'
+            });
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,6 @@
 import makeRequest from '@/app/services/backend';
 import { User } from '@/app/types/user';
-import { Button, Box, Stack, Heading, Center, Text } from '@chakra-ui/react';
+import { Button, Box, Stack, Heading, Center, Text, useToast } from '@chakra-ui/react';
 import styled from '@emotion/styled';
 import Form from '@rjsf/chakra-ui';
 import { IChangeEvent } from '@rjsf/core';
@@ -108,7 +108,7 @@ const uiSchema = {
     },
     password: {
         "ui:widget": "password",
-        "ui:placeholder": "Min 8 chars, include A-Z, a-z, 0-9, @$!%*?&",
+        "ui:placeholder": "Strong Password: Min 8 chars, include A-Z, a-z, 0-9, @$!%*?&",
         "ui:options": {
             label: null,
         }
@@ -141,6 +141,7 @@ const uiSchema = {
 
 export default function RegistrationForm() {
     const router = useRouter();
+    const toast = useToast();
     const [loading, setLoading] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -152,12 +153,27 @@ export default function RegistrationForm() {
         try {
             const response = await makeRequest<User>('POST', `/user`, formData);
             if (response.status === 201) {
+                toast({
+                    title: 'Registration successful',
+                    description: 'You can now login with your credentials',
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top'
+                });
                 router.push('/auth/signin');
             }
-
         } catch (error) {
             console.log(error);
             setError("An unexpected error occurred. Please try again.");
+            toast({
+                title: 'Registration failed',
+                description: 'An unexpected error occurred. Please try again.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top'
+            });
         } finally {
             setLoading(false);
         }
