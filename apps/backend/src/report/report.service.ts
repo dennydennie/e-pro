@@ -89,11 +89,16 @@ export class ReportService {
     endDate: string,
     customerId?: string,
   ) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
     const queryBuilder = this.orderRepository
       .createQueryBuilder('order')
+      .leftJoinAndSelect('order.orderLines', 'orderLines')
+      .leftJoinAndSelect('orderLines.product', 'product')
       .where('order.orderDate BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
       });
 
     if (customerId) {
@@ -111,7 +116,8 @@ export class ReportService {
   ) {
     const queryBuilder = this.paymentRepository
       .createQueryBuilder('payment')
-      .where('payment.paymentDate BETWEEN :startDate AND :endDate', {
+      .leftJoinAndSelect('payment.order', 'order')
+      .where('payment.created BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
       });
@@ -121,10 +127,7 @@ export class ReportService {
     }
 
     const payments = await queryBuilder.getMany();
-    return this.generatePDF('payments', payments.map(payment => ({
-      ...payment,
-      order: payment.order.id
-    })));
+    return this.generatePDF('payments', payments);
   }
 
   private generatePDF(reportType: string, data: any) {
@@ -133,6 +136,10 @@ export class ReportService {
         return this.generateDeliveryNotePDF(reportType, data);
       case 'stocks':
         return this.generateStocksPDF(reportType, data);
+      case 'orders':
+        return this.generateOrdersPDF(reportType, data);
+      case 'payments':
+        return this.generatePaymentsPDF(reportType, data);
       default:
         return this.generateReportPDF(reportType, data);
     }
@@ -247,7 +254,7 @@ export class ReportService {
     // Table Header
     doc.fontSize(14).text('Stock Details', { underline: true });
     doc.moveDown();
-    
+
     // Column Headers
     const tableTop = doc.y;
     doc.fontSize(12)
@@ -255,7 +262,7 @@ export class ReportService {
       .text('Warehouse', 200, tableTop, { width: 150 })
       .text('Quantity', 350, tableTop, { width: 100 })
       .text('Date', 450, tableTop, { width: 100 });
-    
+
     doc.moveDown();
     const startY = doc.y;
     doc.lineWidth(1).moveTo(50, startY).lineTo(550, startY).stroke();
@@ -269,7 +276,7 @@ export class ReportService {
         .text(stock.warehouse?.name || 'N/A', 200, y, { width: 150 })
         .text(stock.quantity.toString(), 350, y, { width: 100 })
         .text(new Date(stock.date).toLocaleDateString(), 450, y, { width: 100 });
-      
+
       doc.moveDown();
     });
 
@@ -277,6 +284,184 @@ export class ReportService {
     doc.moveDown(2);
     const totalQuantity = cleanedData.reduce((sum, stock) => sum + stock.quantity, 0);
     doc.fontSize(12).text(`Total Stock Quantity: ${totalQuantity}`, { underline: true });
+
+    doc.end();
+
+    return {
+      filePath,
+      fileName,
+    };
+  }
+
+  private generateOrdersPDF(reportType: string, data: any) {
+    const cleanedData = this.cleanDataForReport(data);
+
+    const doc = new PDFDocument();
+    const fileName = `${reportType}-${Date.now()}.pdf`;
+    const documentsPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Documents/advanced-scm/reports/');
+
+    if (!fs.existsSync(documentsPath)) {
+      fs.mkdirSync(documentsPath, { recursive: true });
+    }
+
+    const filePath = path.join(documentsPath, fileName);
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    // Header
+    doc.fontSize(25).text('ORDERS REPORT', { align: 'center' });
+    doc.moveDown(2);
+
+    // Date Range
+    doc.fontSize(12).text(`Report Generated: ${new Date().toLocaleDateString()}`, { align: 'right' });
+    doc.moveDown();
+
+    cleanedData.forEach((order, index) => {
+      // Order Header
+      doc.fontSize(14).text(`Order #${index + 1}`, { underline: true });
+      doc.moveDown();
+
+      // Order Details
+      doc.fontSize(12)
+        .text(`Order Date: ${new Date(order.orderDate).toLocaleDateString()}`)
+        .text(`Expected Delivery: ${new Date(order.expectedDeliveryDate).toLocaleDateString()}`)
+        .text(`Status: ${order.status}`)
+        .text(`Nature: ${order.nature}`)
+        .text(`Notes: ${order.notes}`);
+      doc.moveDown();
+
+      // Order Lines Table
+      doc.fontSize(12).text('Order Lines:', { underline: true });
+      doc.moveDown();
+
+      // Table Headers
+      const tableTop = doc.y;
+      doc.fontSize(10)
+        .text('Product', 50, tableTop, { width: 200 })
+        .text('Quantity', 250, tableTop, { width: 100 })
+        .text('Price', 350, tableTop, { width: 100 });
+
+      doc.moveDown();
+      const startY = doc.y;
+      doc.lineWidth(1).moveTo(50, startY).lineTo(550, startY).stroke();
+      doc.moveDown();
+
+      // Order Lines
+      order.orderLines.forEach(line => {
+        const y = doc.y;
+        doc.fontSize(10)
+          .text(line.product.name, 50, y, { width: 200 })
+          .text(line.quantity.toString(), 250, y, { width: 100 })
+          .text(`$${line.product.price.toFixed(2)}`, 350, y, { width: 100 });
+
+        doc.moveDown();
+      });
+
+      // Order Total
+      const orderTotal = order.orderLines.reduce((sum, line) =>
+        sum + (line.quantity * line.product.price), 0);
+      doc.moveDown()
+        .fontSize(12)
+        .text(`Order Total: $${orderTotal.toFixed(2)}`, { align: 'right' });
+
+      // Add page break between orders (except for the last one)
+      if (index < cleanedData.length - 1) {
+        doc.addPage();
+      }
+    });
+
+    // Summary
+    doc.addPage();
+    doc.fontSize(14).text('Summary', { underline: true });
+    doc.moveDown();
+
+    const totalOrders = cleanedData.length;
+    const totalItems = cleanedData.reduce((sum, order) =>
+      sum + order.orderLines.reduce((lineSum, line) => lineSum + line.quantity, 0), 0);
+    const totalValue = cleanedData.reduce((sum, order) =>
+      sum + order.orderLines.reduce((lineSum, line) =>
+        lineSum + (line.quantity * line.product.price), 0), 0);
+
+    doc.fontSize(12)
+      .text(`Total Orders: ${totalOrders}`)
+      .text(`Total Items: ${totalItems}`)
+      .text(`Total Value: $${totalValue.toFixed(2)}`);
+
+    doc.end();
+
+    return {
+      filePath,
+      fileName,
+    };
+  }
+
+  private generatePaymentsPDF(reportType: string, data: any) {
+    const cleanedData = this.cleanDataForReport(data);
+
+    const doc = new PDFDocument();
+    const fileName = `${reportType}-${Date.now()}.pdf`;
+    const documentsPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Documents/advanced-scm/reports/');
+
+    if (!fs.existsSync(documentsPath)) {
+      fs.mkdirSync(documentsPath, { recursive: true });
+    }
+
+    const filePath = path.join(documentsPath, fileName);
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    // Header
+    doc.fontSize(25).text('PAYMENTS REPORT', { align: 'center' });
+    doc.moveDown(2);
+
+    // Date Range
+    doc.fontSize(12).text(`Report Generated: ${new Date().toLocaleDateString()}`, { align: 'right' });
+    doc.moveDown();
+
+    // Summary Statistics
+    const totalAmount = cleanedData.reduce((sum, payment) => sum + payment.amount, 0);
+    const successfulPayments = cleanedData.filter(payment => payment.status === 'Success').length;
+    const failedPayments = cleanedData.filter(payment => payment.status === 'Failed').length;
+
+    doc.fontSize(14).text('Summary', { underline: true });
+    doc.moveDown();
+    doc.fontSize(12)
+      .text(`Total Payments: ${cleanedData.length}`)
+      .text(`Total Amount: $${totalAmount.toFixed(2)}`)
+      .text(`Successful Payments: ${successfulPayments}`)
+      .text(`Failed Payments: ${failedPayments}`);
+    doc.moveDown(2);
+
+    // Payments Table
+    doc.fontSize(14).text('Payment Details', { underline: true });
+    doc.moveDown();
+
+    // Table Headers
+    const tableTop = doc.y;
+    doc.fontSize(10)
+      .text('Date', 50, tableTop, { width: 100 })
+      .text('Amount', 150, tableTop, { width: 80 })
+      .text('Status', 230, tableTop, { width: 80 })
+      .text('Method', 310, tableTop, { width: 80 })
+      .text('Order Date', 390, tableTop, { width: 100 });
+
+    doc.moveDown();
+    const startY = doc.y;
+    doc.lineWidth(1).moveTo(50, startY).lineTo(550, startY).stroke();
+    doc.moveDown();
+
+    // Table Rows
+    cleanedData.forEach(payment => {
+      const y = doc.y;
+      doc.fontSize(10)
+        .text(new Date(payment.created).toLocaleDateString(), 50, y, { width: 100 })
+        .text(`$${payment.amount.toFixed(2)}`, 150, y, { width: 80 })
+        .text(payment.status, 230, y, { width: 80 })
+        .text(payment.method, 310, y, { width: 80 })
+        .text(new Date(payment.order.orderDate).toLocaleDateString(), 390, y, { width: 100 });
+
+      doc.moveDown();
+    });
 
     doc.end();
 

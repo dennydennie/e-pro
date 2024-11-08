@@ -77,6 +77,50 @@ const ReportForm: React.FC = () => {
                 }
             }
         },
+        orders: {
+            type: "object",
+            required: ["reportType", "startDate", "endDate"],
+            properties: {
+                reportType: {
+                    type: "string",
+                    title: "Report Type",
+                    enum: ["orders"],
+                    enumNames: ["Orders Report"]
+                },
+                startDate: {
+                    type: "string",
+                    title: "Start Date",
+                    format: "date"
+                },
+                endDate: {
+                    type: "string",
+                    title: "End Date",
+                    format: "date"
+                }
+            }
+        },
+        payments: {
+            type: "object",
+            required: ["reportType", "startDate", "endDate"],
+            properties: {
+                reportType: {
+                    type: "string",
+                    title: "Report Type",
+                    enum: ["payments"],
+                    enumNames: ["Payments Report"]
+                },
+                startDate: {
+                    type: "string",
+                    title: "Start Date",
+                    format: "date"
+                },
+                endDate: {
+                    type: "string",
+                    title: "End Date",
+                    format: "date"
+                }
+            }
+        },
         delivery_note: {
             type: "object",
             required: ["reportType", "customerId", "orderId"],
@@ -105,6 +149,22 @@ const ReportForm: React.FC = () => {
 
     const uiSchemas = {
         stocks: {
+            startDate: {
+                "ui:widget": "date"
+            },
+            endDate: {
+                "ui:widget": "date"
+            }
+        },
+        orders: {
+            startDate: {
+                "ui:widget": "date"
+            },
+            endDate: {
+                "ui:widget": "date"
+            }
+        },
+        payments: {
             startDate: {
                 "ui:widget": "date"
             },
@@ -174,13 +234,18 @@ const ReportForm: React.FC = () => {
     const handleSubmit = async (data: IChangeEvent<ReportFormData>) => {
         if (!data.formData) return;
 
+        if (data.formData.startDate && data.formData.endDate && new Date(data.formData.startDate) > new Date(data.formData.endDate)) {
+            toast({ id: 'report-error', title: 'Error', description: 'Start date cannot be greater than end date.', status: 'error' });
+            return;
+        }
+
         try {
-            await makeRequest('POST', '/report/generate', data.formData, { 
-                responseType: 'arraybuffer' 
+            await makeRequest('POST', '/report/generate', data.formData, {
+                responseType: 'arraybuffer'
             });
-            toast({id: 'report-success', title: 'Success', description: 'Report saved successfully to the documents folder.', status: 'success'});
+            toast({ id: 'report-success', title: 'Success', description: 'Report saved successfully to the documents folder.', status: 'success' });
         } catch (error) {
-            toast({id: 'report-error', title: 'Error', description: 'Error generating report.', status: 'error'});
+            toast({ id: 'report-error', title: 'Error', description: 'Error generating report.', status: 'error' });
             console.error('Error generating report:', error);
         }
     };
