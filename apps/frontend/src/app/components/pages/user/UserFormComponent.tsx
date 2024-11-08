@@ -9,53 +9,19 @@ import makeRequest from "@/app/services/backend";
 import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/router";
 import { handleResponse } from "@/app/utils/handle-api-response";
+import { useSession } from "next-auth/react";
 
 interface UserFormProps {
     initialData?: User;
 }
-
-const uiSchema = {
-    name: {
-        "ui:widget": "text"
-    },
-    email: {
-        "ui:widget": "email"
-    },
-    password: {
-        "ui:widget": "password"
-    },
-    phoneNumber: {
-        "ui:options": {
-            "inputType": "tel"
-        }
-    },
-    role: {
-        "ui:widget": "select",
-        "ui:placeholder": "Select a role",
-        "ui:options": {
-            enumOptions: [
-                { value: "admin", label: "Admin" },
-                { value: "manager", label: "Manager" },
-                { value: "staff", label: "Staff" }
-            ]
-        }
-    },
-    address: {
-        "ui:widget": "textarea"
-    },
-    department: {
-        "ui:widget": "text"
-    },
-    id: {
-        "ui:widget": "hidden"
-    }
-};
 
 const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
     const [isMessageModalOpen, setIsMessageModalOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
     const router = useRouter();
+    const { data: session } = useSession();
+    const user = session?.user as User;
 
     if (!!initialData) {
         userSchema.properties.id.default = initialData?.id as string;
@@ -90,6 +56,50 @@ const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
         }
     };
 
+    const getUiSchema = () => {
+        const baseSchema = {
+            name: {
+                "ui:widget": "text"
+            },
+            password: {
+                "ui:widget": "password"
+            },
+            phoneNumber: {
+                "ui:options": {
+                    "inputType": "tel"
+                }
+            },
+            address: {
+                "ui:widget": "textarea"
+            },
+            id: {
+                "ui:widget": "hidden"
+            }
+        };
+
+        if (user?.role === 'admin') {
+            return {
+                ...baseSchema,
+                role: {
+                    "ui:widget": "select",
+                    "ui:placeholder": "Select a role",
+                    "ui:options": {
+                        enumOptions: [
+                            { value: "admin", label: "Admin" },
+                            { value: "manager", label: "Manager" },
+                            { value: "staff", label: "Staff" }
+                        ]
+                    }
+                },
+                department: {
+                    "ui:widget": "text"
+                }
+            };
+        }
+
+        return baseSchema;
+    };
+
     return (
         <Box width="50%">
             <Heading fontSize={'2xl'} my={4}>
@@ -97,7 +107,7 @@ const UserForm: React.FC<UserFormProps> = ({ initialData }) => {
             </Heading>
             <Form
                 schema={userSchema}
-                uiSchema={uiSchema}
+                uiSchema={getUiSchema()}
                 formData={initialData}
                 onSubmit={handleSubmit}
                 validator={validator}

@@ -1,9 +1,9 @@
 'use client';
-import PaymentListComponent from "@/app/components/pages/payment/PaymentListComponent";
+import ProductListComponent from "@/app/components/pages/product/ProductListComponent";
 import React from "react";
 
-export default function Payments() {
+export default function Products() {
     return (
-        <PaymentListComponent />
+        <ProductListComponent />
     );
 }

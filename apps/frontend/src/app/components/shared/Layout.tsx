@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Box, Flex, Heading, Stack, Icon } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import { FaPowerOff, FaUser, FaUsers, FaIndustry, FaWarehouse, FaBox, FaClipboardList, FaUserCog, FaChartBar, FaShoppingCart, FaUserTie, FaMoneyBillWave } from 'react-icons/fa';
+import { FaPowerOff, FaUser, FaUsers, FaIndustry, FaWarehouse, FaBox,FaBook, FaClipboardList, FaUserCog, FaChartBar, FaShoppingCart, FaUserTie, FaMoneyBillWave } from 'react-icons/fa';
 import { signOut, useSession } from 'next-auth/react';
 import Loading from './Loading';
 import { CustomLinkType } from '@/app/types/custom-link';
@@ -27,6 +27,7 @@ const Navbar = ({ user }:{ user: User}) => {
         { title: 'Thresholds', basePath: '/threshold', icon: FaChartBar },
         { title: 'Orders', basePath: '/order', icon: FaShoppingCart },
         { title: 'Staff', basePath: '/staff', icon: FaUserTie },
+        {title: 'Reports', basePath: '/report', icon: FaBook},
     ];
 
     const ordinaryUserLinks: CustomLinkType[] = [
@@ -48,18 +49,30 @@ const Navbar = ({ user }:{ user: User}) => {
     }
 
     return (
-        <Flex as="nav" position="fixed" top="0" left="0" w="100%" bg="blue.600" px={2} zIndex="1000" boxShadow="md" alignItems="center">
-            <Flex alignItems="center" mr="auto" align="end">
+        <Flex 
+            as="nav" 
+            position="fixed" 
+            top="0" 
+            left="0" 
+            w="100%" 
+            bg="blue.600" 
+            px={4} 
+            h="60px" 
+            zIndex="1000" 
+            boxShadow="md" 
+            alignItems="center"
+        >
+            <Flex alignItems="center" mr={4}>
                 <Image
                     src="/img/logo.png"
                     alt="Logo"
-                    width={100}
-                    height={100}
-                    style={{ marginRight: '24px' }}
+                    width={50}
+                    height={50}
+                    style={{ marginRight: '8px' }}
                 />
-                <Heading as="a" href="/" color="white">Advanced SCM</Heading>
+                <Heading size="md" color="white">Advanced SCM</Heading>
             </Flex>
-            <Stack direction="row" spacing={[8, 6]}>
+            <Stack direction="row" spacing={4} alignItems="center">
                 {userLinks.map((link, index) => (
                     <Link key={index} href={link.basePath} passHref>
                         <Flex
@@ -67,11 +80,13 @@ const Navbar = ({ user }:{ user: User}) => {
                             color={router.pathname.includes(link.basePath) ? 'white' : 'blue.200'}
                             _hover={{ color: 'white' }}
                             as="a"
+                            fontSize="sm"
                         >
                             <Icon
                                 as={link.icon}
                                 color={router.pathname.includes(link.basePath) ? 'white' : 'blue.200'}
                                 mr={1}
+                                boxSize={4}
                             />
                             <Box
                                 as="span"
@@ -90,8 +105,10 @@ const Navbar = ({ user }:{ user: User}) => {
                         _hover={{ color: 'red' }}
                         as="a"
                         onClick={() => handleLogout()}
+                        ml={2}
+                        mr={2}
                     >
-                        <Icon as={FaPowerOff} boxSize={4} mt={1} />
+                        <Icon as={FaPowerOff} boxSize={4} />
                     </Flex>
                 </Link>
             </Stack>
@@ -102,7 +119,7 @@ const Navbar = ({ user }:{ user: User}) => {
 const MainContent = ({ children }: any) => {
     return (
         <Box
-            mt="70px"
+            mt="20px"
             p={8}
             bg="blue.50"
             minHeight="100vh"

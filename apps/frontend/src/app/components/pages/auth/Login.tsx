@@ -48,11 +48,9 @@ export default function LoginForm() {
     const router = useRouter();
     const toast = useToast();
     const [loading, setLoading] = useState<boolean>(false);
-    const [error, setError] = useState<string | null>(null);
 
     const onSubmit = async (data: IChangeEvent) => {
         setLoading(true);
-        setError(null);
         const { formData } = data;
 
         try {
@@ -62,10 +60,9 @@ export default function LoginForm() {
             });
 
             if (result?.error) {
-                setError(result.error);
                 toast({
                     title: 'Login Failed',
-                    description: result.error,
+                    description: 'Wrong email or password',
                     status: 'error',
                     duration: 5000,
                     isClosable: true,
@@ -84,7 +81,6 @@ export default function LoginForm() {
             }
         } catch (error) {
             const errorMessage = "An unexpected error occurred. Please try again.";
-            setError(errorMessage);
             toast({
                 title: 'Error',
                 description: errorMessage,
@@ -139,7 +135,6 @@ export default function LoginForm() {
                     >
                         Login
                     </Heading>
-                    {error && <Text color="red.500">{error}</Text>}
                     <Form
                         schema={schema}
                         uiSchema={uiSchema}
