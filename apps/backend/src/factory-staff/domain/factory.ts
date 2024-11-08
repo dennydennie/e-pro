@@ -5,7 +5,7 @@ import { Factory } from 'src/factory/domain/factory';
 
 export class FactoryStaff {
     id: string;
-    user: User;
+    user?: User;
     factory: Factory;
     jobTitle: string;
     department: string;
@@ -13,8 +13,8 @@ export class FactoryStaff {
     static fromEntity(entity: FactoryStaffEntity): FactoryStaff {
         return {
             id: entity.id,
-            factory: Factory.fromEntity(entity.factory),
-            user: User.fromEntity(entity.user),
+            factory: Factory.fromEntity(entity?.factory),
+            user: User?.fromEntity(entity?.user),
             jobTitle: entity.jobTitle,
             department: entity.department,
         };

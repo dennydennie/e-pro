@@ -133,11 +133,10 @@ export class ReportService {
 
     const doc = new PDFDocument();
     const fileName = `${reportType}-${Date.now()}.pdf`;
-    console.log(process.env.HOME, process.env.USERPROFILE);
-    const documentsPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Documents');
+    const documentsPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Documents/advanced-scm/reports/');
 
     if (!fs.existsSync(documentsPath)) {
-      fs.mkdirSync(documentsPath);
+      fs.mkdirSync(documentsPath, { recursive: true });
     }
 
     const filePath = path.join(documentsPath, fileName);
@@ -148,14 +147,14 @@ export class ReportService {
     doc.fontSize(25).text(`${reportType.toUpperCase()} REPORT`, { align: 'center' });
     doc.moveDown(2);
 
-    doc.fontSize(18).text('Order Details', { underline: true });
+    doc.fontSize(14).text('Order Details', { underline: true });
     doc.moveDown();
     doc.fontSize(12).text(`Nature: ${cleanedData.nature}`);
     doc.text(`Status: ${cleanedData.status}`);
     doc.text(`Notes: ${cleanedData.notes}`);
     doc.moveDown();
 
-    doc.fontSize(18).text('Customer Details', { underline: true });
+    doc.fontSize(14).text('Customer Details', { underline: true });
     doc.moveDown();
     const customer = cleanedData.customer;
     doc.text(`Name: ${customer.name}`);
@@ -165,7 +164,7 @@ export class ReportService {
     doc.text(`Shipping Address: ${customer.shippingAddress}`);
     doc.moveDown();
 
-    doc.fontSize(18).text('Order Lines', { underline: true });
+    doc.fontSize(14).text('Order Lines', { underline: true });
     doc.moveDown();
 
     doc.fontSize(12).text('Product Name         Quantity          Price', { underline: true });
