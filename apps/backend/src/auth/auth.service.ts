@@ -15,11 +15,15 @@ export class AuthService {
       deleted: IsNull(),
     });
 
+    console.log(user);
+    console.log(email, password);
+
     if (!user) {
       throw new NotAcceptableException('Wrong email or password');
     }
 
-    const match = await bcrypt.compare(password, user.password)
+    const match = await bcrypt.compare(password, user.password);
+    console.log(match);
 
     if (!match) {
       throw new NotAcceptableException('Wrong email or password');

@@ -44,6 +44,14 @@ export class OrderService {
     return order;
   }
 
+  async findOrdersByCustomer(customerId: string) {
+    const orders = await this.orderRepository.find({ where: { customer: { id: customerId } } });
+    if (!orders) {
+      throw new NotFoundException(`No orders found for customer ID ${customerId}`);
+    }
+    return orders;
+  }
+
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<OrderEntity> {
     const order = await this.findOne(id);
     this.orderRepository.merge(order, updateOrderDto);

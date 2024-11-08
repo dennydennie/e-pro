@@ -33,6 +33,17 @@ export class OrderController {
   }
 
   @ApiOperation({
+    summary: 'Get orders by customer ID',
+    description: 'This endpoint retrieves all the orders associated with a specific customer ID.',
+  })
+  @ApiResponse({ status: 200, description: 'The list of orders for the customer.' })
+  @ApiResponse({ status: 404, description: 'Customer not found or no orders found.' })
+  @Get('customer/:customerId')
+  async findOrdersByCustomer(@Param('customerId') customerId: string) {
+    return await this.orderService.findOrdersByCustomer(customerId);
+  }
+
+  @ApiOperation({
     summary: 'Get an order by ID',
     description: 'This endpoint retrieves a specific order by its ID.',
   })
