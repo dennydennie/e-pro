@@ -44,7 +44,10 @@ const uiSchema = {
         "ui:widget": "text"
     },
     expiryDate: {
-        "ui:widget": "date"
+        "ui:widget": "date",
+        "ui:options": {
+            min: new Date().toISOString().split('T')[0]
+        }
     }, id: {
         "ui:widget": "hidden"
     }

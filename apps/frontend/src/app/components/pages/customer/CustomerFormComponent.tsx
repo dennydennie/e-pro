@@ -98,7 +98,6 @@ const CustomerForm: React.FC<CustomerFormProps> = ({ initialData }) => {
                 uiSchema={uiSchema}
                 formData={initialData}
                 onSubmit={handleSubmit}
-                liveValidate
                 validator={validator}            >
                 <HStack mt={4} spacing={8}>
                     <Button type="submit" colorScheme="blue">

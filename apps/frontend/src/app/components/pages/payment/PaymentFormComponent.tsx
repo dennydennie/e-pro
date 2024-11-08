@@ -55,7 +55,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ initialData }) => {
     };
 
     const handleAfterSave = () => {
-        router.push(`/payment/view/${id}`);
+        router.push(`/payment`);
     }
 
     const handleSubmit = async (data: IChangeEvent<Payment>, event: React.FormEvent<HTMLFormElement>) => {

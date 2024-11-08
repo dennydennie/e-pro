@@ -12,9 +12,9 @@ export const customerSchema = {
         },
         contactPerson: { type: "string", title: "Contact Person", minLength: 1, maxLenght: 40 },
         contactPersonMobile: { type: "string", title: "Contact Person Mobile", minLength: 1, maxLenght: 40 },
-        shippingAddress: { type: "string", title: "Shipping Address", minLength: 1, maxLenght: 40 },
-        shippingLatitude: { type: "string", title: "Shipping Latitude", maxLenght: 6 },
-        shippingLongitude: { type: "string", title: "Shipping Longitude", maxLenght: 6 }
+        shippingAddress: { type: "string", title: "Shipping Address", minLength: 1, maxLenght: 40, },
+        shippingLatitude: { type: "string", title: "Shipping Latitude", maxLenght: 6, min: -180, max: 180 },
+        shippingLongitude: { type: "string", title: "Shipping Longitude", maxLenght: 6, min: -180, max: 180 }
     },
     required: ["name", "email", "contactPerson", "contactPersonMobile", "shippingAddress", "shippingLatitude", "shippingLongitude"]
 };

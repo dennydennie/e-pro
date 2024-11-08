@@ -7,6 +7,7 @@ import { StockRepository } from 'src/db/repository/stock.repository';
 import { OrderRepository } from 'src/db/repository/order.repository';
 import { PaymentRepository } from 'src/db/repository/payment.repository';
 import * as path from 'path';
+import { Between } from 'typeorm';
 
 @Injectable()
 export class ReportService {
@@ -39,13 +40,11 @@ export class ReportService {
   }
 
   private async generateStocksReport(startDate: string, endDate: string) {
-    const stocks = await this.stockRepository
-      .createQueryBuilder('stock')
-      .where('stock.createdAt BETWEEN :startDate AND :endDate', {
-        startDate,
-        endDate,
-      })
-      .getMany();
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const stocks = await this.stockRepository.findBy({
+      created: Between(start, end)
+    });
 
     return this.generatePDF('stocks', stocks);
   }
@@ -129,6 +128,42 @@ export class ReportService {
   }
 
   private generatePDF(reportType: string, data: any) {
+    switch (reportType) {
+      case 'delivery_note':
+        return this.generateDeliveryNotePDF(reportType, data);
+      case 'stocks':
+        return this.generateStocksPDF(reportType, data);
+      default:
+        return this.generateReportPDF(reportType, data);
+    }
+  }
+
+  private generateReportPDF(reportType: string, data: any) {
+    const cleanedData = this.cleanDataForReport(data);
+
+    const doc = new PDFDocument();
+    const fileName = `${reportType}-${Date.now()}.pdf`;
+    const documentsPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Documents/advanced-scm/reports/');
+
+    if (!fs.existsSync(documentsPath)) {
+      fs.mkdirSync(documentsPath, { recursive: true });
+    }
+
+    const filePath = path.join(documentsPath, fileName);
+
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    doc.fontSize(25).text(`${reportType.toUpperCase()} REPORT`, { align: 'center' });
+    doc.moveDown(2);
+
+    //dump the data
+    doc.text(JSON.stringify(cleanedData, null, 2));
+
+    doc.end();
+  }
+
+  private generateDeliveryNotePDF(reportType: string, data: any) {
     const cleanedData = this.cleanDataForReport(data);
 
     const doc = new PDFDocument();
@@ -177,6 +212,71 @@ export class ReportService {
       const line = `${product.name.padEnd(20)} ${String(quantity).padEnd(16)} $${price}`;
       doc.text(line);
     });
+
+    doc.end();
+
+    return {
+      filePath,
+      fileName,
+    };
+  }
+
+  private generateStocksPDF(reportType: string, data: any) {
+    const cleanedData = this.cleanDataForReport(data);
+
+    const doc = new PDFDocument();
+    const fileName = `${reportType}-${Date.now()}.pdf`;
+    const documentsPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Documents/advanced-scm/reports/');
+
+    if (!fs.existsSync(documentsPath)) {
+      fs.mkdirSync(documentsPath, { recursive: true });
+    }
+
+    const filePath = path.join(documentsPath, fileName);
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    // Header
+    doc.fontSize(25).text('STOCK INVENTORY REPORT', { align: 'center' });
+    doc.moveDown(2);
+
+    // Date Range
+    doc.fontSize(12).text(`Report Generated: ${new Date().toLocaleDateString()}`, { align: 'right' });
+    doc.moveDown();
+
+    // Table Header
+    doc.fontSize(14).text('Stock Details', { underline: true });
+    doc.moveDown();
+    
+    // Column Headers
+    const tableTop = doc.y;
+    doc.fontSize(12)
+      .text('Product', 50, tableTop, { width: 150 })
+      .text('Warehouse', 200, tableTop, { width: 150 })
+      .text('Quantity', 350, tableTop, { width: 100 })
+      .text('Date', 450, tableTop, { width: 100 });
+    
+    doc.moveDown();
+    const startY = doc.y;
+    doc.lineWidth(1).moveTo(50, startY).lineTo(550, startY).stroke();
+    doc.moveDown();
+
+    // Table Rows
+    cleanedData.forEach((stock) => {
+      const y = doc.y;
+      doc.fontSize(10)
+        .text(stock.product?.name || 'N/A', 50, y, { width: 150 })
+        .text(stock.warehouse?.name || 'N/A', 200, y, { width: 150 })
+        .text(stock.quantity.toString(), 350, y, { width: 100 })
+        .text(new Date(stock.date).toLocaleDateString(), 450, y, { width: 100 });
+      
+      doc.moveDown();
+    });
+
+    // Summary
+    doc.moveDown(2);
+    const totalQuantity = cleanedData.reduce((sum, stock) => sum + stock.quantity, 0);
+    doc.fontSize(12).text(`Total Stock Quantity: ${totalQuantity}`, { underline: true });
 
     doc.end();
 

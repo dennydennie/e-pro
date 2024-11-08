@@ -9,8 +9,8 @@ export const createFactorySchema = (users: User[], id?: string) => {
             id: { type: "string", title: "ID", default: id },
             name: { type: "string", title: "Factory Name" },
             address: { type: "string", title: "Address" },
-            latitude: { type: "number", title: "Latitude" },
-            longitude: { type: "number", title: "Longitude" },
+            latitude: { type: "number", title: "Latitude", min: -180, max: 180 },
+            longitude: { type: "number", title: "Longitude", min: -180, max: 180 },
             userId: {
                 title: "Manager",
                 type: ["string", "null"],

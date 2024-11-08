@@ -15,16 +15,20 @@ export class EmailService {
     quantityInStock: number,
     recipientEmail: string,
   ) {
-    await this.mailerService.sendMail({
-      to: recipientEmail,
-      subject: 'Low Stock Alert',
-      template: './low-stock-alert',
-      context: {
-        productName,
-        warehouse,
-        quantityInStock,
-      },
-    });
+    try {
+      await this.mailerService.sendMail({
+        to: recipientEmail,
+        subject: 'Low Stock Alert',
+        template: './low-stock-alert',
+        context: {
+          productName,
+          warehouse,
+          quantityInStock,
+        },
+      });
+    } catch (error) {
+      console.log('Error sending email', error)
+    }
   }
 
   async sendPaymentReceivedEmail(
