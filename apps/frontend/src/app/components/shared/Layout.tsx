@@ -61,8 +61,9 @@ const Navbar = ({ user }:{ user: User}) => {
             zIndex="1000" 
             boxShadow="md" 
             alignItems="center"
+            justify="space-between"
         >
-            <Flex alignItems="center" mr={4}>
+            <Flex alignItems="center">
                 <Image
                     src="/img/logo.png"
                     alt="Logo"
