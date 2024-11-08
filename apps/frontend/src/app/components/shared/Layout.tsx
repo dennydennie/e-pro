@@ -142,7 +142,7 @@ const Layout = ({ children }: any) => {
         }
     }, [status, router]);
 
-    if (status === "loading") {
+    if (status === "loading" || status === "unauthenticated") {
         return <Loading />;
     }
 
