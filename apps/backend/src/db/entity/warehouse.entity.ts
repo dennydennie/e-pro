@@ -23,7 +23,7 @@ export class WarehouseEntity extends AbstractEntity {
     @OneToMany(() => StockThresholdEntity, (stockThreshold: StockThresholdEntity) => stockThreshold.warehouse)
     stockThresholds: StockThresholdEntity[];
 
-    @OneToMany(() => StockEntity, (stock: StockEntity) => stock.warehouseId)
+    @OneToMany(() => StockEntity, (stock: StockEntity) => stock.warehouse)
     stocks: StockEntity[];
 
     @Column({ type: 'decimal', precision: 10, scale: 8 })

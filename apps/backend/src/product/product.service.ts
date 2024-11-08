@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductRepository } from 'src/db/repository/product.repository';
@@ -11,10 +11,15 @@ export class ProductService {
   constructor(
     private productRepository: ProductRepository,
     private warehouseRepository: WarehouseRepository,
-  ) {}
+  ) { }
 
   async create(createProductDto: CreateProductDto): Promise<ProductEntity> {
     const product = this.productRepository.create(createProductDto);
+
+    if (!!createProductDto.mass && !!createProductDto.volume) {
+      throw new BadRequestException('Mass and volume cannot be set at the same time');
+    }
+
     return await this.productRepository.save(product);
   }
 

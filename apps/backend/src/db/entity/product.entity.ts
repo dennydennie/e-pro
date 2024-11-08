@@ -36,6 +36,6 @@ export class ProductEntity extends AbstractEntity {
   )
   orderLines: OrderLineEntity[];
 
-  @OneToMany(() => StockEntity, (stock: StockEntity) => stock.productId)
+  @OneToMany(() => StockEntity, (stock: StockEntity) => stock.product)
   stocks: StockEntity[];
 }

@@ -68,6 +68,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
 
         const formData = data.formData;
 
+        if (new Date(formData.expectedDeliveryDate) < new Date(formData.orderDate)) {
+            setMessageType('error');
+            setMessage('Expected delivery date must be on or after the order date');
+            setIsMessageModalOpen(true);
+            return;
+        }
+
         try {
             let response;
 

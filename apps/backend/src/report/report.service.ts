@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import { StockRepository } from 'src/db/repository/stock.repository';
 import { OrderRepository } from 'src/db/repository/order.repository';
 import { PaymentRepository } from 'src/db/repository/payment.repository';
+import * as path from 'path';
 
 @Injectable()
 export class ReportService {
@@ -13,7 +14,7 @@ export class ReportService {
     private stockRepository: StockRepository,
     private orderRepository: OrderRepository,
     private paymentRepository: PaymentRepository,
-  ) {}
+  ) { }
 
   async generateReport(createReportDto: CreateReportDto) {
     const { reportType, startDate, endDate, customerId, orderId } =
@@ -52,14 +53,36 @@ export class ReportService {
   private async generateDeliveryNote(customerId: string, orderId: string) {
     const order = await this.orderRepository.findOne({
       where: { id: orderId },
-      relations: ['customer', 'orderItems', 'orderItems.product'],
+      relations: ['customer', 'orderLines', 'orderLines.product'],
     });
 
     if (!order || order.customer.id !== customerId) {
       throw new Error('Order not found');
     }
 
-    return this.generatePDF('delivery_note', order);
+    const orderWithWarehouse = {
+      ...order,
+      orderLines: await Promise.all(
+        order.orderLines.map(async (line) => {
+          const stocksInWarehouses = await this.stockRepository
+            .createQueryBuilder('stock')
+            .where('stock.productId = :productId', { productId: line.product.id })
+            .andWhere('stock.quantity >= :quantity', { quantity: line.quantity })
+            .leftJoinAndSelect('stock.warehouse', 'warehouse')
+            .getMany();
+
+          const selectedWarehouseId = stocksInWarehouses[0]?.warehouseId || { name: 'Out of stock' };
+          const selectedWarehouse = stocksInWarehouses.find(stock => stock.warehouseId === selectedWarehouseId);
+
+          return {
+            ...line,
+            warehouse: selectedWarehouse
+          };
+        })
+      )
+    };
+
+    return this.generatePDF('delivery_note', orderWithWarehouse);
   }
 
   private async generateOrdersReport(
@@ -99,34 +122,100 @@ export class ReportService {
     }
 
     const payments = await queryBuilder.getMany();
-    return this.generatePDF('payments', payments);
+    return this.generatePDF('payments', payments.map(payment => ({
+      ...payment,
+      order: payment.order.id
+    })));
   }
 
   private generatePDF(reportType: string, data: any) {
+    const cleanedData = this.cleanDataForReport(data);
+
     const doc = new PDFDocument();
     const fileName = `${reportType}-${Date.now()}.pdf`;
-    const filePath = `./reports/${fileName}`;
+    console.log(process.env.HOME, process.env.USERPROFILE);
+    const documentsPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Documents');
 
-    // Ensure reports directory exists
-    if (!fs.existsSync('./reports')) {
-      fs.mkdirSync('./reports');
+    if (!fs.existsSync(documentsPath)) {
+      fs.mkdirSync(documentsPath);
     }
 
-    // Create PDF write stream
+    const filePath = path.join(documentsPath, fileName);
+
     const stream = fs.createWriteStream(filePath);
     doc.pipe(stream);
 
-    // Add content based on report type
-    doc.fontSize(25).text(`${reportType.toUpperCase()} REPORT`, 100, 100);
-    doc.fontSize(12).text(JSON.stringify(data, null, 2), 100, 150);
+    doc.fontSize(25).text(`${reportType.toUpperCase()} REPORT`, { align: 'center' });
+    doc.moveDown(2);
+
+    doc.fontSize(18).text('Order Details', { underline: true });
+    doc.moveDown();
+    doc.fontSize(12).text(`Nature: ${cleanedData.nature}`);
+    doc.text(`Status: ${cleanedData.status}`);
+    doc.text(`Notes: ${cleanedData.notes}`);
+    doc.moveDown();
+
+    doc.fontSize(18).text('Customer Details', { underline: true });
+    doc.moveDown();
+    const customer = cleanedData.customer;
+    doc.text(`Name: ${customer.name}`);
+    doc.text(`Email: ${customer.email}`);
+    doc.text(`Contact Person: ${customer.contactPerson}`);
+    doc.text(`Mobile: ${customer.contactPersonMobile}`);
+    doc.text(`Shipping Address: ${customer.shippingAddress}`);
+    doc.moveDown();
+
+    doc.fontSize(18).text('Order Lines', { underline: true });
+    doc.moveDown();
+
+    doc.fontSize(12).text('Product Name         Quantity          Price', { underline: true });
+
+    cleanedData.orderLines.forEach(orderLine => {
+      const product = orderLine.product;
+      const quantity = orderLine.quantity;
+      const price = product.price.toFixed(2);
+
+      const line = `${product.name.padEnd(20)} ${String(quantity).padEnd(16)} $${price}`;
+      doc.text(line);
+    });
 
     doc.end();
 
-    // Return file path or stream the file directly
     return {
       filePath,
       fileName,
     };
+  }
+
+  private cleanDataForReport(data: any): any {
+    if (Array.isArray(data)) {
+      return data.map(item => this.cleanDataForReport(item));
+    }
+
+    if (typeof data === 'object' && data !== null) {
+      const cleanedObj = {};
+
+      for (const [key, value] of Object.entries(data)) {
+        if (['id', 'updatedAt', 'deletedAt'].includes(key)) {
+          continue;
+        }
+
+        if (key === 'createdAt') {
+          cleanedObj['date'] = new Date(value as string).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+          });
+          continue;
+        }
+
+        cleanedObj[key] = this.cleanDataForReport(value);
+      }
+
+      return cleanedObj;
+    }
+
+    return data;
   }
 
 }

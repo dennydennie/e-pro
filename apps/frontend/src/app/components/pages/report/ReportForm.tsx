@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
-import { Box, Button, Heading } from "@chakra-ui/react";
+import { Box, Button, Heading, useToast } from "@chakra-ui/react";
 import Form from '@rjsf/chakra-ui';
 import validator from '@rjsf/validator-ajv8';
 import { Customer } from "@/app/types/customer";
@@ -11,8 +11,8 @@ import { Order } from "@/app/types/order";
 
 interface ReportFormData {
     reportType: string;
-    startDate: string;
-    endDate: string;
+    startDate?: string;
+    endDate?: string;
     customerId?: string;
     orderId?: string;
 }
@@ -22,6 +22,7 @@ const ReportForm: React.FC = () => {
     const [orders, setOrders] = useState<Order[]>([]);
     const [customerId, setCustomerId] = useState<string | undefined>();
     const router = useRouter();
+    const toast = useToast();
 
     useEffect(() => {
         const fetchCustomers = async () => {
@@ -78,23 +79,13 @@ const ReportForm: React.FC = () => {
         },
         delivery_note: {
             type: "object",
-            required: ["reportType", "startDate", "endDate", "customerId", "orderId"],
+            required: ["reportType", "customerId", "orderId"],
             properties: {
                 reportType: {
                     type: "string",
                     title: "Report Type",
                     enum: ["delivery_note"],
                     enumNames: ["Delivery Note"]
-                },
-                startDate: {
-                    type: "string",
-                    title: "Start Date",
-                    format: "date"
-                },
-                endDate: {
-                    type: "string",
-                    title: "End Date",
-                    format: "date"
                 },
                 customerId: {
                     type: "string",
@@ -122,12 +113,6 @@ const ReportForm: React.FC = () => {
             }
         },
         delivery_note: {
-            startDate: {
-                "ui:widget": "date"
-            },
-            endDate: {
-                "ui:widget": "date"
-            },
             customerId: {
                 "ui:widget": "select",
                 "ui:placeholder": "Select customer"
@@ -190,21 +175,12 @@ const ReportForm: React.FC = () => {
         if (!data.formData) return;
 
         try {
-            const response = await makeRequest<Blob>('POST', '/report/generate', data.formData, { responseType: 'blob' });
-            
-            const blob = new Blob([response.data], { type: 'application/pdf' });
-            
-            const url = window.URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `report-${data.formData.reportType}-${new Date().toISOString()}.pdf`;
-            document.body.appendChild(link);
-            link.click();
-            
-            document.body.removeChild(link);
-            window.URL.revokeObjectURL(url);
+            await makeRequest('POST', '/report/generate', data.formData, { 
+                responseType: 'arraybuffer' 
+            });
+            toast({id: 'report-success', title: 'Success', description: 'Report saved successfully to the documents folder.', status: 'success'});
         } catch (error) {
+            toast({id: 'report-error', title: 'Error', description: 'Error generating report.', status: 'error'});
             console.error('Error generating report:', error);
         }
     };

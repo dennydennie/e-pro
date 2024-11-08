@@ -36,13 +36,22 @@ export class StockThresholdService {
 
       const product = await this.productRepository.findOneBy({
         deleted: IsNull(),
-        id: threshold.product.id
+        id: threshold.product?.id
       });
+
+      if (!product) {
+        throw new NotFoundException(`Product with ID ${threshold.product?.id} not found`);
+      }
 
       const warehouse = await this.warehouseRepository.findOneBy({
         deleted: IsNull(),
-        id: threshold.warehouse.id,
+        id: threshold.warehouse?.id,
       })
+
+      if (!warehouse) {
+        throw new NotFoundException(`Warehouse with ID ${threshold.warehouse?.id} not found`);
+      }
+
       return StockThresholdDetail.fromEntity({
         ...threshold,
         product,
