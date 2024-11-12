@@ -10,6 +10,7 @@ import MessageModal from "../../shared/MessageModal";
 import { useRouter } from "next/router";
 import { Customer } from "@/app/types/customer";
 import { handleResponse } from "@/app/utils/handle-api-response";
+import CustomDateWidget from "../../shared/CustomDateWidget";
 
 interface OrderFormProps {
     initialData?: Order;
@@ -18,7 +19,7 @@ interface OrderFormProps {
 const uiSchema = {
     id: { "ui:widget": "hidden" },
     orderDate: { "ui:widget": "date" },
-    expectedDeliveryDate: { "ui:widget": "date" },
+    expectedDeliveryDate: { "ui:widget": "date", "ui:options": { minDate: "orderDate" } },
     notes: { "ui:widget": "textarea" },
     status: {
         "ui:widget": "select",
@@ -40,6 +41,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
     const [messageType, setMessageType] = useState<'error' | 'success'>('error');
     const router = useRouter();
     const [customers, setCustomers] = useState<Customer[]>([]);
+    const [formData, setFormData] = useState<Order | undefined>(initialData);
 
     useEffect(() => {
         const fetchFormData = async () => {
@@ -67,6 +69,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
         }
 
         const formData = data.formData;
+        setFormData(formData);
+
 
         if (new Date(formData.expectedDeliveryDate) < new Date(formData.orderDate)) {
             setMessageType('error');
@@ -99,6 +103,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
             setIsMessageModalOpen(true);
         }
     };
+    const customWidgets = { DateWidget: CustomDateWidget };
 
     return (
         <Box width="50%">
@@ -108,9 +113,10 @@ const OrderForm: React.FC<OrderFormProps> = ({ initialData }) => {
             <Form
                 schema={orderSchema}
                 uiSchema={uiSchema}
-                formData={initialData}
+                formData={formData}
                 onSubmit={handleSubmit}
                 validator={validator}
+                widgets={customWidgets}
             >
                 <HStack mt={4} spacing={8}>
                     <Button type="submit" colorScheme="blue">
