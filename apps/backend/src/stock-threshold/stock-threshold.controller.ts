@@ -42,7 +42,6 @@ export class StockThresholdController {
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<StockThresholdSummary> {
     const i = await this.stockThresholdService.findOne(id);
-    console.log(i);
     return i;
   }
 

@@ -3,6 +3,7 @@ import { Entity, Column, ManyToOne, JoinColumn } from 'typeorm';
 import AbstractEntity from './abstract.entity';
 import { OrderEntity } from './order.entity';
 import { ProductEntity } from './product.entity';
+import { WarehouseEntity } from './warehouse.entity';
 
 @Entity({ name: 'order_line' })
 export class OrderLineEntity extends AbstractEntity {
@@ -19,6 +20,13 @@ export class OrderLineEntity extends AbstractEntity {
 
     @Column({ nullable: true })
     productId: string;
+
+    @Column({ nullable: true })
+    warehouseId: string;
+
+    @ManyToOne(() => WarehouseEntity, (warehouse: WarehouseEntity) => warehouse.id, { nullable: true })
+    @JoinColumn()
+    warehouse: WarehouseEntity;
 
     @Column()
     quantity: number;

@@ -54,7 +54,6 @@ export class PaymentService {
         return total + orderLine.product.price * orderLine.quantity;
       }, 0);
 
-      console.log(order.orderLines);
 
       const orderLines: OrderLine[] = order.orderLines.map((orderLineEntity) =>
         OrderLine.fromEntity(orderLineEntity),

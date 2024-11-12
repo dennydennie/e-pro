@@ -65,7 +65,6 @@ function PaymentListComponent() {
     const [loading, setLoading] = React.useState(true);
     const { data: userData, status } = useSession();
     const user: User | undefined = userData?.user as User;
-    console.log(user);
     const isAdmin = user?.role !== 'user' || false;
 
     React.useEffect(() => {
@@ -74,7 +73,6 @@ function PaymentListComponent() {
             try {
                 const payments: PaymentDetail[] = (await makeRequest<PaymentDetail[]>('GET', '/payment')).data;
                 setData(payments);
-                console.log(payments);
             } catch (error) {
                 console.warn('Error fetching payments:', error);
             } finally {

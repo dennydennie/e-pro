@@ -36,7 +36,6 @@ export class EmailService {
     orderLines: OrderLine[],
     grandTotal: number
   ) {
-    console.log(payment);
     try {
       await this.mailerService.sendMail({
         to: payment.customer.email,

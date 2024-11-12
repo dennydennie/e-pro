@@ -221,7 +221,6 @@ const ReportForm: React.FC = () => {
     });
 
     const handleChange = (e: IChangeEvent<ReportFormData>) => {
-        console.log(e);
         const newFormData = e.formData || {
             reportType: '',
             startDate: '',

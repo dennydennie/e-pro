@@ -20,7 +20,6 @@ export const authOptions = {
         const email = credentials!.email;
         const password = credentials!.password;
         try {
-          console.log(email,password);
           const response = await axios.post(`${env.BACKEND_URL}/auth/login`, {
             email,
             password,

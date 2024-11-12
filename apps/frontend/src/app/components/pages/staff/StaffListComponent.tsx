@@ -67,7 +67,6 @@ function FactoryStaffListComponent() {
             setLoading(true);
             try {
                 const staff: FactoryStaffDetail[] = (await makeRequest<FactoryStaffDetail[]>('GET', '/factory-staff')).data;
-                console.log(staff);
                 setData(staff);
             } catch (error) {
                 console.warn('Error fetching factory staff:', error);

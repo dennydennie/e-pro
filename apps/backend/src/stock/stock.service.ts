@@ -159,7 +159,6 @@ export class StockService {
       deleted: IsNull(),
     });
 
-    console.log(warehouseId, warehouse);
 
     if (!warehouse) {
       throw new NotFoundException('Warehouse not found.');
@@ -263,29 +262,76 @@ export class StockService {
     await this.stockRepository.remove(stock);
   }
 
+  async findWarehouseWithStock(productId: string, quantity: number, orderDestination: { latitude: number, longitude: number }): Promise<StockEntity | null> {
+    const stocks = await this.stockRepository.find({
+      where: {
+        productId,
+        deleted: IsNull(),
+      },
+      relations: ['warehouse'],
+    });
+
+    const product = await this.productRepository.findOneBy({
+      id: productId,
+      deleted: IsNull(),
+    });
+
+    const availableStocks = stocks.filter(stock => stock.quantity >= quantity);
+
+    if (availableStocks.length === 0) {
+      throw new NotFoundException(`No warehouse found with sufficient stock for product ID ${product.id}. Requested: ${quantity}`);
+    }
+
+    const stocksWithDistance = availableStocks.map(stock => {
+      const distance = this.calculateHaversineDistance(
+        orderDestination.latitude,
+        orderDestination.longitude,
+        stock.warehouse.latitude,
+        stock.warehouse.longitude
+      );
+      return { stock, distance };
+    });
+
+    stocksWithDistance.sort((a, b) => a.distance - b.distance);
+
+    return stocksWithDistance[0].stock;
+  }
+
+  private calculateHaversineDistance(
+    lat1: number,
+    lon1: number,
+    lat2: number,
+    lon2: number
+  ): number {
+    const R = 6371;
+    const dLat = this.toRadians(lat2 - lat1);
+    const dLon = this.toRadians(lon2 - lon1);
+
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(this.toRadians(lat1)) * Math.cos(this.toRadians(lat2)) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
+
+  private toRadians(degrees: number): number {
+    return degrees * (Math.PI / 180);
+  }
+
   async removeStocksFromOrder(order: OrderEntity) {
-    console.log('removing stocks for ', order);
-    // for (const orderLine of order.orderLines) {
-    //   const { productId, quantity } = orderLine;
 
-    //   const stock = await this.stockRepository.findOne({
-    //     where: {
-    //       productId: productId,
-    //       warehouseId: order.warehouseId, // Assuming order has a warehouseId
-    //     },
-    //   });
+    for (const orderLine of order.orderLines) {
+      const { productId, quantity } = orderLine;
 
-    //   if (!stock) {
-    //     throw new NotFoundException(`Stock not found for product ID ${productId} in warehouse ${order.warehouseId}`);
-    //   }
+      const availableStock = await this.findWarehouseWithStock(productId, quantity, { latitude: order.customer.shippingLatitude, longitude: order.customer.shippingLongitude });
 
-    //   if (stock.quantity < quantity) {
-    //     throw new BadRequestException(`Insufficient stock for product ID ${productId}. Available: ${stock.quantity}, Requested: ${quantity}`);
-    //   }
+      orderLine.warehouseId = availableStock.warehouseId;
+      orderLine.warehouse = availableStock.warehouse;
 
-    //   stock.quantity -= quantity;
-
-    //   await this.stockRepository.save(stock);
-    // }
+      availableStock.quantity -= quantity;
+      await this.stockRepository.save(availableStock);
+    }
   }
 }

@@ -33,7 +33,6 @@ export default function EditWarehouse() {
     if (loading) {
         return <Loading />;
     }
-    console.log(initialData);
 
     return <WarehouseForm initialData={initialData} />;
 }
