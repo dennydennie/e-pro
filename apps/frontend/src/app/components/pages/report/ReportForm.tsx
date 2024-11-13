@@ -8,6 +8,7 @@ import makeRequest from "@/app/services/backend";
 import { IChangeEvent } from "@rjsf/core";
 import { useRouter } from "next/router";
 import { Order } from "@/app/types/order";
+import { RawMaterial } from "../raw-material/RawMaterialListComponent";
 
 interface ReportFormData {
     reportType: string;
@@ -15,6 +16,7 @@ interface ReportFormData {
     endDate?: string;
     customerId?: string;
     orderId?: string;
+    rawMaterialId?: string;
 }
 
 const ReportForm: React.FC = () => {
@@ -23,6 +25,7 @@ const ReportForm: React.FC = () => {
     const [customerId, setCustomerId] = useState<string | undefined>();
     const router = useRouter();
     const toast = useToast();
+    const [rawMaterials, setRawMaterials] = useState<RawMaterial[]>([]);
 
     useEffect(() => {
         const fetchCustomers = async () => {
@@ -53,6 +56,19 @@ const ReportForm: React.FC = () => {
         }
         fetchOrders(customerId!);
     }, [customerId]);
+
+    useEffect(() => {
+        const fetchRawMaterials = async () => {
+            try {
+                const response = await makeRequest<RawMaterial[]>('GET', '/raw-material');
+                setRawMaterials(response.data);
+            } catch (error) {
+                console.error('Error fetching raw materials:', error);
+            }
+        };
+
+        fetchRawMaterials();
+    }, []);
 
     const schemas = {
         stocks: {
@@ -167,6 +183,22 @@ const ReportForm: React.FC = () => {
                 }
             }
         },
+        best_supplier: {
+            type: "object",
+            required: ["reportType", "rawMaterialId"],
+            properties: {
+                reportType: {
+                    type: "string",
+                    title: "Report Type",
+                    enum: ["best_supplier"],
+                    enumNames: ["Best Supplier Report"]
+                },
+                rawMaterialId: {
+                    type: "string",
+                    title: "Raw Material"
+                }
+            }
+        },
     };
 
     const uiSchemas = {
@@ -212,6 +244,12 @@ const ReportForm: React.FC = () => {
                 "ui:widget": "date"
             }
         },
+        best_supplier: {
+            rawMaterialId: {
+                "ui:widget": "select",
+                "ui:placeholder": "Select raw material"
+            }
+        },
     };
 
     const initialSchema = {
@@ -221,8 +259,8 @@ const ReportForm: React.FC = () => {
             reportType: {
                 type: "string",
                 title: "Report Type",
-                enum: ["stocks", "delivery_note", "orders", "payments", "sales_forecast"],
-                enumNames: ["Stocks Report", "Delivery Note", "Orders Report", "Payments Report", "Sales Forecast Report"]
+                enum: ["stocks", "delivery_note", "orders", "payments", "sales_forecast", "best_supplier"],
+                enumNames: ["Stocks Report", "Delivery Note", "Orders Report", "Payments Report", "Sales Forecast Report", "Best Supplier Report"]
             }
         }
     };
@@ -278,6 +316,11 @@ const ReportForm: React.FC = () => {
             console.error('Error generating report:', error);
         }
     };
+    const bestSupplierSchema = schemas.best_supplier;
+    if (bestSupplierSchema && bestSupplierSchema.properties.rawMaterialId) {
+        (bestSupplierSchema.properties.rawMaterialId as any).enum = rawMaterials.map(rm => rm.id);
+        (bestSupplierSchema.properties.rawMaterialId as any).enumNames = rawMaterials.map(rm => rm.name);
+    }
 
     return (
         <Box width="50%" py={8}>

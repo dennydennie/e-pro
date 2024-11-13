@@ -8,6 +8,7 @@ import { OrderRepository } from 'src/db/repository/order.repository';
 import { PaymentRepository } from 'src/db/repository/payment.repository';
 import * as path from 'path';
 import { Between } from 'typeorm';
+import { RawMaterialRepository } from 'src/db/repository/raw-material.repository';
 
 @Injectable()
 export class ReportService {
@@ -15,10 +16,11 @@ export class ReportService {
     private stockRepository: StockRepository,
     private orderRepository: OrderRepository,
     private paymentRepository: PaymentRepository,
+    private rawMaterialRepository: RawMaterialRepository,
   ) { }
 
   async generateReport(createReportDto: CreateReportDto) {
-    const { reportType, startDate, endDate, customerId, orderId } =
+    const { reportType, startDate, endDate, customerId, orderId, rawMaterialId } =
       createReportDto;
 
     switch (reportType) {
@@ -36,6 +38,8 @@ export class ReportService {
         );
       case 'sales_forecast':
         return await this.generateSalesForecastReport(startDate, endDate);
+      case 'best_supplier':
+        return await this.generateBestSupplierReport(rawMaterialId!);
       default:
         throw new Error('Invalid report type');
     }
@@ -196,12 +200,11 @@ export class ReportService {
       });
     });
 
-    // Calculate forecasts for each product
     const forecasts = Object.values(productSales).map((productData: any) => {
       const avgQuantityPerOrder = productData.totalQuantity / productData.salesHistory.length;
       const avgRevenuePerOrder = productData.totalRevenue / productData.salesHistory.length;
       
-      const growthRate = 1.1; // Assuming 10% growth
+      const growthRate = 1.1; 
 
       return {
         product: productData.product,
@@ -227,6 +230,77 @@ export class ReportService {
     };
   }
 
+  private async generateBestSupplierReport(rawMaterialId: string) {
+    const rawMaterial = await this.rawMaterialRepository.findOne({
+      where: { id: rawMaterialId },
+      relations: ['prices', 'prices.supplier', 'prices.supplier.reviews'],
+    });
+
+    if (!rawMaterial) {
+      throw new Error('Raw material not found');
+    }
+
+    const suppliers = [...new Set(rawMaterial.prices.map(price => price.supplier))];
+
+    const supplierScores = await Promise.all(
+      suppliers.map(async (supplier) => {
+        const latestPrice = rawMaterial.prices
+          .filter(p => p.supplier.id === supplier.id)
+          .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime())[0];
+        const priceScore = latestPrice ? this.calculatePriceScore(latestPrice.price) : 0;
+
+        const reviewScore = this.calculateReviewScore(supplier.reviews);
+
+        const taxScore = this.calculateTaxScore(supplier.taxExpiry);
+
+        const prazScore = supplier.prazNumber ? 1 : 0;
+
+        const totalScore = (priceScore * 0.3) + (reviewScore * 0.3) + (taxScore * 0.2) + (prazScore * 0.2);
+
+        return {
+          supplier,
+          latestPrice: latestPrice?.price || 0,
+          scores: {
+            priceScore: priceScore * 0.3,
+            reviewScore: reviewScore * 0.3,
+            taxScore: taxScore * 0.2,
+            prazScore: prazScore * 0.2,
+            total: totalScore
+          }
+        };
+      })
+    );
+
+    supplierScores.sort((a, b) => b.scores.total - a.scores.total);
+
+    return this.generatePDF('best_supplier', {
+      rawMaterial,
+      supplierScores,
+      generatedDate: new Date()
+    });
+  }
+
+  private calculatePriceScore(price: number): number {
+    return 1 / (1 + Math.log(price));
+  }
+
+  private calculateReviewScore(reviews: any[]): number {
+    if (!reviews || reviews.length === 0) return 0;
+    const avgRating = reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+    return avgRating / 5; 
+  }
+
+  private calculateTaxScore(taxExpiry: Date): number {
+    const today = new Date();
+    const expiryDate = new Date(taxExpiry);
+    
+    if (expiryDate < today) return 0; // Expired
+    
+    const monthsUntilExpiry = (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24 * 30);
+    
+    return Math.min(monthsUntilExpiry / 12, 1);
+  }
+
   private generatePDF(reportType: string, data: any) {
     switch (reportType) {
       case 'delivery_note':
@@ -239,6 +313,8 @@ export class ReportService {
         return this.generatePaymentsPDF(reportType, data);
       case 'sales_forecast':
         return this.generateSalesForecastPDF(reportType, data);
+      case 'best_supplier':
+        return this.generateBestSupplierPDF(reportType, data);
       default:
         return this.generateReportPDF(reportType, data);
     }
@@ -628,6 +704,66 @@ export class ReportService {
         doc.addPage();
       }
     });
+
+    doc.end();
+
+    return {
+      filePath,
+      fileName,
+    };
+  }
+
+  private generateBestSupplierPDF(reportType: string, data: any) {
+    const doc = new PDFDocument();
+    const fileName = `${reportType}-${Date.now()}.pdf`;
+    const documentsPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Documents/advanced-scm/reports/');
+
+    if (!fs.existsSync(documentsPath)) {
+      fs.mkdirSync(documentsPath, { recursive: true });
+    }
+
+    const filePath = path.join(documentsPath, fileName);
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    // Header
+    doc.fontSize(25).text('BEST SUPPLIER ANALYSIS', { align: 'center' });
+    doc.moveDown(2);
+
+    // Report Info
+    doc.fontSize(12)
+      .text(`Raw Material: ${data.rawMaterial.name}`)
+      .text(`Generated: ${new Date(data.generatedDate).toLocaleDateString()}`)
+      .moveDown(2);
+
+    // Supplier Rankings
+    doc.fontSize(16).text('Supplier Rankings', { underline: true });
+    doc.moveDown();
+
+    data.supplierScores.forEach((score, index) => {
+      doc.fontSize(14).text(`${index + 1}. ${score.supplier.name}`);
+      doc.fontSize(10)
+        .text(`Total Score: ${(score.scores.total * 100).toFixed(2)}%`)
+        .text(`Latest Price: $${Number(score.latestPrice).toFixed(2)}`)
+        .text(`Price Score: ${(score.scores.priceScore * 100).toFixed(2)}%`)
+        .text(`Review Score: ${(score.scores.reviewScore * 100).toFixed(2)}%`)
+        .text(`Tax Clearance Score: ${(score.scores.taxScore * 100).toFixed(2)}%`)
+        .text(`PRAZ Score: ${(score.scores.prazScore * 100).toFixed(2)}%`)
+        .text(`Contact: ${score.supplier.contactNumber}`)
+        .text(`Address: ${score.supplier.address}`)
+        .moveDown();
+    });
+
+    // Methodology
+    doc.addPage();
+    doc.fontSize(16).text('Scoring Methodology', { underline: true });
+    doc.moveDown();
+    doc.fontSize(10)
+      .text('The supplier scoring is based on the following criteria:')
+      .text('• Price (30%): Lower prices receive higher scores')
+      .text('• Customer Reviews (30%): Based on average rating')
+      .text('• Tax Clearance (20%): Based on validity period')
+      .text('• PRAZ Registration (20%): Based on having valid registration');
 
     doc.end();
 

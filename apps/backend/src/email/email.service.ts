@@ -66,16 +66,20 @@ export class EmailService {
     recipientEmail: string,
     grandTotal: number,
   ) {
-    await this.mailerService.sendMail({
-      to: recipientEmail,
-      subject: 'Order Status Update',
-      template: './order-status-change',
-      context: {
-        userName,
-        products,
-        orderStatus,
-        grandTotal,
-      },
-    });
+    try {
+      await this.mailerService.sendMail({
+        to: recipientEmail,
+        subject: 'Order Status Update',
+        template: './order-status-change',
+        context: {
+          userName,
+          products,
+          orderStatus,
+          grandTotal,
+        },
+      });
+    } catch (error) {
+      console.log('Error sending email', error);
+    }
   }
 }
