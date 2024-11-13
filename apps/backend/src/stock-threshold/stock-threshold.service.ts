@@ -24,7 +24,11 @@ export class StockThresholdService {
     const stockThreshold = this.stockThresholdRepository.create(
       createStockThresholdDto,
     );
-    return await this.stockThresholdRepository.save(stockThreshold);
+    const response = await this.stockThresholdRepository.save(stockThreshold);
+
+    return await this.stockThresholdRepository.findOneBy({
+      id: response.id
+    })
   }
 
   async findAll(): Promise<StockThresholdDetail[]> {
@@ -65,6 +69,7 @@ export class StockThresholdService {
   async findOne(id: string): Promise<StockThresholdSummary> {
     const stockThreshold = await this.stockThresholdRepository.findOne({
       where: { id },
+      relations: ['product', 'warehouse']
     });
     if (!stockThreshold) {
       throw new NotFoundException(`Stock threshold with ID ${id} not found`);

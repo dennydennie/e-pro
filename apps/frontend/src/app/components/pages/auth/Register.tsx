@@ -21,7 +21,7 @@ const schema = {
             type: "string",
             title: "Name",
             minLength: 2,
-            maxLength: 50,
+            maxLength: 30,
             pattern: "^[a-zA-Z ]+$",
             errorMessage: {
                 pattern: "Name should only contain letters and spaces"
@@ -32,16 +32,18 @@ const schema = {
             title: "Email",
             format: "email",
             minLength: 6,
-            maxLength: 50,
+            maxLength: 30,
+            pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
             errorMessage: {
-                format: "Please enter a valid email address"
+                format: "Please enter a valid email address",
+                pattern: "Please enter a valid email address format (e.g., user@example.com)"
             }
         },
         password: {
             type: "string",
             title: "Password",
             minLength: 8,
-            maxLength: 30,
+            maxLength: 20,
             pattern: "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$",
             errorMessage: {
                 pattern: "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
@@ -72,21 +74,37 @@ const schema = {
             default: "user"
         },
         address: {
-            type: "string",
+            type: "object",
             title: "Address",
-            minLength: 5,
-            maxLength: 100,
-            errorMessage: {
-                minLength: "Address must be at least 5 characters long"
-            }
+            properties: {
+                street: {
+                    type: "string",
+                    title: "Street & House #",
+                    minLength: 3,
+                    maxLength: 30
+                },
+                city: {
+                    type: "string",
+                    title: "City/Town",
+                    minLength: 2,
+                    maxLength: 30
+                },
+                province: {
+                    type: "string",
+                    title: "Province",
+                    enum: ["Harare", "Bulawayo", "Manicaland", "Mashonaland Central", 
+                           "Mashonaland East", "Mashonaland West", "Masvingo", 
+                           "Matabeleland North", "Matabeleland South", "Midlands"]
+                }
+            },
+            required: ["street", "city", "province"]
         },
         department: {
             type: "string",
             title: "Department",
-            minLength: 2,
-            maxLength: 50,
+            enum: ["Sales", "Information Technology", "Finance", "Procurement", "Production"],
             errorMessage: {
-                minLength: "Department must be at least 2 characters long"
+                enum: "Please select a valid department"
             }
         },
     },
@@ -126,13 +144,22 @@ const uiSchema = {
         }
     },
     address: {
-        "ui:placeholder": "Enter your address",
         "ui:options": {
-            label: null,
+            label: null
+        },
+        street: {
+            "ui:placeholder": "Enter street name and house number"
+        },
+        city: {
+            "ui:placeholder": "Enter city or town name"
+        },
+        province: {
+            "ui:placeholder": "Select province"
         }
     },
     department: {
-        "ui:placeholder": "Enter your department",
+        "ui:widget": "select",
+        "ui:placeholder": "Select your department",
         "ui:options": {
             label: null,
         }
@@ -149,6 +176,12 @@ export default function RegistrationForm() {
         setLoading(true);
         setError(null);
         const { formData } = data;
+
+        // Combine address fields
+        if (formData.address) {
+            const { street, city, province } = formData.address;
+            formData.address = `${street}, ${city}, ${province}`;
+        }
 
         try {
             const response = await makeRequest<User>('POST', `/user`, formData);
@@ -210,7 +243,7 @@ export default function RegistrationForm() {
                         size="lg"
                         textColor={"blue.600"}
                     >
-                        Advanced SCM
+                        Advanced Integrated SCM
                     </Heading>
                     <Heading
                         textAlign={"center"}

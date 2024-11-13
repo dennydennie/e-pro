@@ -24,6 +24,14 @@ import { FactoryStaffEntity } from './entity/factory-staff.entity';
 import { StockSubscriber } from './subscriber/stock.subscriber';
 import PaymentEntity from './entity/payment.entity';
 import { PaymentRepository } from './repository/payment.repository';
+import { PriceRepository } from './repository/price.repository';
+import { RawMaterialRepository } from './repository/raw-material.repository';
+import { ReviewRepository } from './repository/review.repository';
+import { SupplierRepository } from './repository/supplier.repository';
+import { ReviewEntity } from './entity/review.entity';
+import { RawMaterialEntity } from './entity/raw-material.entity';
+import { PriceEntity } from './entity/price.entity';
+import { SupplierEntity } from './entity/supplier.entity';
 
 @Module({
     imports: [
@@ -39,6 +47,10 @@ import { PaymentRepository } from './repository/payment.repository';
             UserEntity,
             WarehouseEntity,
             PaymentEntity,
+            SupplierEntity,
+            ReviewEntity,
+            PriceEntity,
+            RawMaterialEntity,
         ]),
     ],
     providers: [
@@ -54,6 +66,10 @@ import { PaymentRepository } from './repository/payment.repository';
         WarehouseRepository,
         PaymentRepository,
         StockSubscriber,
+        SupplierRepository,
+        ReviewRepository,
+        PriceRepository,
+        RawMaterialRepository,
     ],
     exports: [
         CustomerRepository,
@@ -66,7 +82,11 @@ import { PaymentRepository } from './repository/payment.repository';
         StockThresholdRepository,
         UserRepository,
         PaymentRepository,
-        WarehouseRepository
+        WarehouseRepository,
+        SupplierRepository,
+        ReviewRepository,
+        PriceRepository,
+        RawMaterialRepository,
     ],
 })
 export class DbModule { }

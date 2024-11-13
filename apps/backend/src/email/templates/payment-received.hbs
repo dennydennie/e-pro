@@ -15,11 +15,11 @@
 <ul>
   {{#each orderLine}}
     <li>
-      <strong>{{this.orderLine.product.name}}</strong> (Quantity: {{this.quantity}}, Price: ${{this.orderLine.product.price}}, Total: ${{(this.orderLine.product.price * this.quantity)}})
+      <strong>{{this.orderLine.product.name}}</strong> (Quantity: {{this.quantity}}, Price: ${{this.orderLine.product.price}})
     </li>
   {{/each}}
 </ul>
-<p><strong>Grand Total:</strong> ${{grandTotal.toFixed(2)}}</p>
+<p><strong>Grand Total:</strong> ${{grandTotal}}</p>
 
 <p>If you have any questions or concerns, feel free to reach out to our support team.</p>
 <p>Thank you for choosing us!</p>

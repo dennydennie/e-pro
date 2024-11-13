@@ -18,6 +18,10 @@ import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
 import { PaymentModule } from './payment/payment.module';
 import { ReportModule } from './report/report.module';
+import { SupplierModule } from './supplier/supplier.module';
+import { PriceModule } from './price/price.module';
+import { RawMaterialModule } from './raw-material/raw-material.module';
+import { ReviewModule } from './review/review.module';
 
 export const TYPEORM_CONFIG = {
   imports: [ConfigModule],
@@ -63,6 +67,10 @@ export const TYPEORM_CONFIG = {
     EmailModule,
     PaymentModule,
     ReportModule,
+    SupplierModule,
+    PriceModule,
+    RawMaterialModule,
+    ReviewModule,
   ],
   controllers: [],
   providers: [],

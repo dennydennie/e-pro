@@ -34,6 +34,8 @@ export class ReportService {
           endDate,
           customerId,
         );
+      case 'sales_forecast':
+        return await this.generateSalesForecastReport(startDate, endDate);
       default:
         throw new Error('Invalid report type');
     }
@@ -45,6 +47,10 @@ export class ReportService {
     const stocks = await this.stockRepository.findBy({
       created: Between(start, end)
     });
+
+    if (!stocks || stocks.length === 0) {
+      throw new Error('No stock data found for the selected date range');
+    }
 
     return this.generatePDF('stocks', stocks);
   }
@@ -106,6 +112,11 @@ export class ReportService {
     }
 
     const orders = await queryBuilder.getMany();
+    
+    if (!orders || orders.length === 0) {
+      throw new Error('No orders found for the selected date range');
+    }
+
     return this.generatePDF('orders', orders);
   }
 
@@ -127,7 +138,93 @@ export class ReportService {
     }
 
     const payments = await queryBuilder.getMany();
+
+    if (!payments || payments.length === 0) {
+      throw new Error('No payments found for the selected date range');
+    }
+
     return this.generatePDF('payments', payments);
+  }
+
+  private async generateSalesForecastReport(startDate: string, endDate: string) {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+
+    // Get historical orders data
+    const orders = await this.orderRepository
+      .createQueryBuilder('order')
+      .leftJoinAndSelect('order.orderLines', 'orderLines')
+      .leftJoinAndSelect('orderLines.product', 'product')
+      .where('order.orderDate BETWEEN :startDate AND :endDate', {
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+      })
+      .getMany();
+
+    if (!orders || orders.length === 0) {
+      throw new Error('No order data found for sales forecast in the selected date range');
+    }
+
+    // Calculate sales metrics
+    const salesData = this.calculateSalesMetrics(orders);
+    return this.generatePDF('sales_forecast', salesData);
+  }
+
+  private calculateSalesMetrics(orders: any[]) {
+    // Group sales by product
+    const productSales = {};
+    
+    orders.forEach(order => {
+      order.orderLines.forEach(line => {
+        const productId = line.product.id;
+        if (!productSales[productId]) {
+          productSales[productId] = {
+            product: line.product,
+            totalQuantity: 0,
+            totalRevenue: 0,
+            salesHistory: []
+          };
+        }
+        
+        productSales[productId].totalQuantity += line.quantity;
+        productSales[productId].totalRevenue += line.quantity * line.product.price;
+        productSales[productId].salesHistory.push({
+          date: order.orderDate,
+          quantity: line.quantity,
+          revenue: line.quantity * line.product.price
+        });
+      });
+    });
+
+    // Calculate forecasts for each product
+    const forecasts = Object.values(productSales).map((productData: any) => {
+      const avgQuantityPerOrder = productData.totalQuantity / productData.salesHistory.length;
+      const avgRevenuePerOrder = productData.totalRevenue / productData.salesHistory.length;
+      
+      const growthRate = 1.1; // Assuming 10% growth
+
+      return {
+        product: productData.product,
+        currentStats: {
+          totalQuantity: productData.totalQuantity,
+          totalRevenue: productData.totalRevenue,
+          avgQuantityPerOrder,
+          avgRevenuePerOrder
+        },
+        forecast: {
+          nextMonthQuantity: Math.round(avgQuantityPerOrder * productData.salesHistory.length * growthRate),
+          nextMonthRevenue: avgRevenuePerOrder * productData.salesHistory.length * growthRate,
+          growthRate: `${((growthRate - 1) * 100).toFixed(1)}%`
+        }
+      };
+    });
+
+    return {
+      totalOrders: orders.length,
+      forecasts,
+      periodStart: orders[0]?.orderDate,
+      periodEnd: orders[orders.length - 1]?.orderDate
+    };
   }
 
   private generatePDF(reportType: string, data: any) {
@@ -140,6 +237,8 @@ export class ReportService {
         return this.generateOrdersPDF(reportType, data);
       case 'payments':
         return this.generatePaymentsPDF(reportType, data);
+      case 'sales_forecast':
+        return this.generateSalesForecastPDF(reportType, data);
       default:
         return this.generateReportPDF(reportType, data);
     }
@@ -327,6 +426,7 @@ export class ReportService {
         .text(`Expected Delivery: ${new Date(order.expectedDeliveryDate).toLocaleDateString()}`)
         .text(`Status: ${order.status}`)
         .text(`Nature: ${order.nature}`)
+        .text(`Order Classification: ${order.orderClassification}`)
         .text(`Notes: ${order.notes}`);
       doc.moveDown();
 
@@ -352,7 +452,8 @@ export class ReportService {
         doc.fontSize(10)
           .text(line.product.name, 50, y, { width: 200 })
           .text(line.quantity.toString(), 250, y, { width: 100 })
-          .text(`$${line.product.price.toFixed(2)}`, 350, y, { width: 100 });
+          .text(line.warehouse.name, 350, y, { width: 100 })
+          .text(`$${line.product.price.toFixed(2)}`, 450, y, { width: 100 });
 
         doc.moveDown();
       });
@@ -461,6 +562,71 @@ export class ReportService {
         .text(new Date(payment.order.orderDate).toLocaleDateString(), 390, y, { width: 100 });
 
       doc.moveDown();
+    });
+
+    doc.end();
+
+    return {
+      filePath,
+      fileName,
+    };
+  }
+
+  private generateSalesForecastPDF(reportType: string, data: any) {
+    const cleanedData = this.cleanDataForReport(data);
+
+    const doc = new PDFDocument();
+    const fileName = `${reportType}-${Date.now()}.pdf`;
+    const documentsPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Documents/advanced-scm/reports/');
+
+    if (!fs.existsSync(documentsPath)) {
+      fs.mkdirSync(documentsPath, { recursive: true });
+    }
+
+    const filePath = path.join(documentsPath, fileName);
+    const stream = fs.createWriteStream(filePath);
+    doc.pipe(stream);
+
+    // Header
+    doc.fontSize(25).text('SALES FORECAST REPORT', { align: 'center' });
+    doc.moveDown(2);
+
+    // Period Information
+    doc.fontSize(12)
+      .text(`Analysis Period: ${new Date(cleanedData.periodStart).toLocaleDateString()} - ${new Date(cleanedData.periodEnd).toLocaleDateString()}`, { align: 'right' })
+      .text(`Total Orders Analyzed: ${cleanedData.totalOrders}`, { align: 'right' });
+    doc.moveDown(2);
+
+    // Forecast Summary
+    doc.fontSize(16).text('Product Forecasts', { underline: true });
+    doc.moveDown();
+
+    cleanedData.forecasts.forEach((forecast, index) => {
+      // Product Header
+      doc.fontSize(14).text(forecast.product.name, { underline: true });
+      doc.moveDown();
+
+      // Current Statistics
+      doc.fontSize(12).text('Current Performance:');
+      doc.fontSize(10)
+        .text(`Total Quantity Sold: ${forecast.currentStats.totalQuantity}`)
+        .text(`Total Revenue: $${forecast.currentStats.totalRevenue.toFixed(2)}`)
+        .text(`Average Quantity per Order: ${forecast.currentStats.avgQuantityPerOrder.toFixed(1)}`)
+        .text(`Average Revenue per Order: $${forecast.currentStats.avgRevenuePerOrder.toFixed(2)}`);
+      doc.moveDown();
+
+      // Forecast
+      doc.fontSize(12).text('Forecast:');
+      doc.fontSize(10)
+        .text(`Expected Next Month Quantity: ${forecast.forecast.nextMonthQuantity}`)
+        .text(`Expected Next Month Revenue: $${forecast.forecast.nextMonthRevenue.toFixed(2)}`)
+        .text(`Projected Growth Rate: ${forecast.forecast.growthRate}`);
+      doc.moveDown(2);
+
+      // Add page break between products (except for the last one)
+      if (index < cleanedData.forecasts.length - 1) {
+        doc.addPage();
+      }
     });
 
     doc.end();

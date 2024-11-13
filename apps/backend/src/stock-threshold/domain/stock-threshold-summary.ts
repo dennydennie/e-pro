@@ -10,8 +10,8 @@ export class StockThresholdSummary {
     static fromEntity(entity: any): StockThresholdSummary {
         return {
             id: entity.id,
-            productId: entity.product.id,
-            warehouseId: entity.warehouse.id,
+            productId: entity.product?.id,
+            warehouseId: entity.warehouse?.id,
             lowStockThreshold: entity.lowStockThreshold,
             highStockThreshold: entity.highStockThreshold,
         };

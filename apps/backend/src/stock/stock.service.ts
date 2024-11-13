@@ -279,7 +279,7 @@ export class StockService {
     const availableStocks = stocks.filter(stock => stock.quantity >= quantity);
 
     if (availableStocks.length === 0) {
-      throw new NotFoundException(`No warehouse found with sufficient stock for product ID ${product.id}. Requested: ${quantity}`);
+      throw new NotFoundException(`No warehouse found with sufficient stock for product ${product.name}. Requested: ${quantity}`);
     }
 
     const stocksWithDistance = availableStocks.map(stock => {

@@ -9,7 +9,7 @@ import StockThresholdForm from "@/app/components/pages/stock-threshold/StockThre
 
 export default function EditStockThreshold() {
     const router = useRouter();
-    const { slug:stockThresholdId } = router.query;
+    const { slug: stockThresholdId } = router.query;
     const [initialData, setInitialData] = useState<StockThreshold | undefined>(undefined);
     const [loading, setLoading] = useState(true);
 
@@ -19,6 +19,7 @@ export default function EditStockThreshold() {
                 try {
                     const data: StockThreshold = (await makeRequest<StockThreshold>('GET', `/stock-threshold/${stockThresholdId}`)).data;
                     setInitialData(data);
+                    console.log(data);
                 } catch (error) {
                     console.error('Error fetching stock threshold:', error);
                 } finally {

@@ -35,6 +35,7 @@ const StockThresholdForm: React.FC<StockThresholdFormProps> = ({ initialData }) 
     const router = useRouter();
     const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
+    const [formData, setFormData]= useState<StockThreshold | undefined>(initialData);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -67,6 +68,8 @@ const StockThresholdForm: React.FC<StockThresholdFormProps> = ({ initialData }) 
 
         const formData = data.formData;
 
+        console.log(formData)
+
         try {
             let response;
 
@@ -95,7 +98,7 @@ const StockThresholdForm: React.FC<StockThresholdFormProps> = ({ initialData }) 
             <Form
                 schema={stockThresholdSchema}
                 uiSchema={uiSchema}
-                formData={initialData}
+                formData={formData}
                 onSubmit={handleSubmit}
                 validator={validator}
             >

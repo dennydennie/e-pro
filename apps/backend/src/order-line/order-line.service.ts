@@ -9,6 +9,7 @@ import { OrderRepository } from 'src/db/repository/order.repository';
 import { IsNull } from 'typeorm';
 import { OrderLine } from './domain/order-line';
 import { OrderLineSummary } from './domain/order-line-summary';
+import { OrderService } from 'src/order/order.service';
 
 @Injectable()
 export class OrderLineService {
@@ -16,6 +17,7 @@ export class OrderLineService {
     private orderLineRepository: OrderLineRepository,
     private productRepository: ProductRepository,
     private orderRepository: OrderRepository,
+    private orderService: OrderService,
   ) { }
 
   async create(createOrderLineDto: CreateOrderLineDto): Promise<OrderLineEntity> {
@@ -47,7 +49,10 @@ export class OrderLineService {
     orderLine.orderId = order.id;
     orderLine.order = order;
 
-    return await this.orderLineRepository.save(orderLine);
+    const orderLineEntity = await this.orderLineRepository.save(orderLine);
+    await this.orderService.updateOrderType(order.id)
+
+    return orderLineEntity;
   }
 
   async findAll(): Promise<OrderLineEntity[]> {
@@ -108,11 +113,15 @@ export class OrderLineService {
   ): Promise<OrderLineEntity> {
     const orderLine = await this.orderLineRepository.findOne({ where: { id } });
     this.orderLineRepository.merge(orderLine, updateOrderLineDto);
-    return await this.orderLineRepository.save(orderLine);
+    const newLine = await this.orderLineRepository.save(orderLine);
+
+    await this.orderService.updateOrderType(orderLine.orderId);
+    return newLine;
   }
 
   async remove(id: string): Promise<void> {
     const orderLine = await this.orderLineRepository.findOne({ where: { id } });
     await this.orderLineRepository.remove(orderLine);
+    await this.orderService.updateOrderType(orderLine.orderId);
   }
 }

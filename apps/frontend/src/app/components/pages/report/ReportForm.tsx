@@ -145,6 +145,28 @@ const ReportForm: React.FC = () => {
                 }
             }
         },
+        sales_forecast: {
+            type: "object",
+            required: ["reportType", "startDate", "endDate"],
+            properties: {
+                reportType: {
+                    type: "string",
+                    title: "Report Type",
+                    enum: ["sales_forecast"],
+                    enumNames: ["Sales Forecast Report"]
+                },
+                startDate: {
+                    type: "string",
+                    title: "Start Date",
+                    format: "date"
+                },
+                endDate: {
+                    type: "string",
+                    title: "End Date",
+                    format: "date"
+                }
+            }
+        },
     };
 
     const uiSchemas = {
@@ -182,6 +204,14 @@ const ReportForm: React.FC = () => {
                 "ui:placeholder": "Select order"
             }
         },
+        sales_forecast: {
+            startDate: {
+                "ui:widget": "date"
+            },
+            endDate: {
+                "ui:widget": "date"
+            }
+        },
     };
 
     const initialSchema = {
@@ -191,8 +221,8 @@ const ReportForm: React.FC = () => {
             reportType: {
                 type: "string",
                 title: "Report Type",
-                enum: ["stocks", "delivery_note", "orders", "payments"],
-                enumNames: ["Stocks Report", "Delivery Note", "Orders Report", "Payments Report"]
+                enum: ["stocks", "delivery_note", "orders", "payments", "sales_forecast"],
+                enumNames: ["Stocks Report", "Delivery Note", "Orders Report", "Payments Report", "Sales Forecast Report"]
             }
         }
     };

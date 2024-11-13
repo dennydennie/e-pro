@@ -7,6 +7,7 @@ import { OrderEntity } from 'src/db/entity/order.entity';
 import { CustomerRepository } from 'src/db/repository/customer.repository';
 import { IsNull } from 'typeorm';
 import { Order } from './domain/order';
+import { OrderClassification } from './enum/order-classification.enum';
 
 @Injectable()
 export class OrderService {
@@ -27,6 +28,7 @@ export class OrderService {
 
     const order = this.orderRepository.create(createOrderDto);
     order.customer = customer;
+
     return await this.orderRepository.save(order);
   }
 
@@ -61,5 +63,25 @@ export class OrderService {
   async remove(id: string): Promise<void> {
     const order = await this.findOne(id);
     await this.orderRepository.remove(order);
+  }
+  
+  async updateOrderType(orderId: string): Promise<void> {
+
+    const order = await this.orderRepository.findOneBy({
+      id: orderId
+    })
+
+    const totalCost = order.orderLines.reduce((sum, line) => sum + (line.product.price * line.quantity), 0);
+    const totalQuantity = order.orderLines.reduce((sum, line) => sum + line.quantity, 0);
+
+    if (totalCost > 2000 && totalQuantity > 1000) {
+      order.classification = OrderClassification.STRATEGIC;
+    } else if (totalCost < 2000 && totalQuantity < 500) {
+      order.classification = OrderClassification.OPERATIONAL;
+    } else if (totalCost > 10000 && totalQuantity > 5000) {
+      order.classification = OrderClassification.COLLABORATIVE;
+    }
+
+    await this.orderRepository.update(orderId, {...order})
   }
 }

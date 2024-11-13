@@ -125,7 +125,7 @@ export default function LoginForm() {
                         size="lg"
                         textColor={"blue.600"}
                     >
-                        Advanced SCM
+                        Advanced Integrated SCM
                     </Heading>
                     <Heading
                         textAlign={"center"}

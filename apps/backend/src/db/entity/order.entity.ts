@@ -3,6 +3,7 @@ import { Entity, Column, OneToMany, ManyToOne } from 'typeorm';
 import { OrderLineEntity } from './order-line.entity';
 import { CustomerEntity } from './customer.entity';
 import AbstractEntity from './abstract.entity';
+import { OrderClassification } from 'src/order/enum/order-classification.enum';
 
 @Entity({ name: 'order' })
 export class OrderEntity extends AbstractEntity {
@@ -26,4 +27,7 @@ export class OrderEntity extends AbstractEntity {
 
     @Column()
     status: string;
+
+    @Column({ nullable: true })
+    classification: OrderClassification;
 }
