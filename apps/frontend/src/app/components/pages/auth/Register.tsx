@@ -63,10 +63,6 @@ const schema = {
             title: "Role",
             oneOf: [
                 {
-                    const: "admin",
-                    title: "Admin"
-                },
-                {
                     const: "user",
                     title: "User"
                 }
@@ -75,7 +71,7 @@ const schema = {
         },
         address: {
             type: "object",
-            title: "Address",
+            title: "",
             properties: {
                 street: {
                     type: "string",
@@ -112,16 +108,19 @@ const schema = {
 };
 
 const uiSchema = {
+    "ui:classNames": "compact-form",
     name: {
         "ui:placeholder": "Enter your name (letters only)",
         "ui:options": {
             label: null,
+            classNames: "form-field",
         }
     },
     email: {
         "ui:placeholder": "Enter your email (e.g., user@example.com)",
         "ui:options": {
             label: null,
+            classNames: "form-field",
         }
     },
     password: {
@@ -129,18 +128,21 @@ const uiSchema = {
         "ui:placeholder": "Strong Password: Min 8 chars, include A-Z, a-z, 0-9, @$!%*?&",
         "ui:options": {
             label: null,
+            classNames: "form-field",
         }
     },
     phoneNumber: {
         "ui:placeholder": "+263xxxxxxxxx",
         "ui:options": {
             label: null,
+            classNames: "form-field",
         }
     },
     role: {
         "ui:widget": "select",
         "ui:options": {
             label: null,
+            classNames: "form-field",
         }
     },
     address: {
@@ -148,13 +150,25 @@ const uiSchema = {
             label: null
         },
         street: {
-            "ui:placeholder": "Enter street name and house number"
+            "ui:placeholder": "Enter street name and house number",
+            "ui:options": {
+                label: null,
+                classNames: "form-field",
+            }
         },
         city: {
-            "ui:placeholder": "Enter city or town name"
+            "ui:placeholder": "Enter city or town name",
+            "ui:options": {
+                label: null,
+                classNames: "form-field",
+            }
         },
         province: {
-            "ui:placeholder": "Select province"
+            "ui:placeholder": "Select province",
+            "ui:options": {
+                label: null,
+                classNames: "form-field",
+            }
         }
     },
     department: {
@@ -162,9 +176,26 @@ const uiSchema = {
         "ui:placeholder": "Select your department",
         "ui:options": {
             label: null,
+            classNames: "form-field",
         }
     }
 };
+
+export const FormStyles = styled.div`
+  .compact-form {
+    .form-field {
+      margin-bottom: 8px !important;
+    }
+    
+    .chakra-form-control {
+      margin-bottom: 8px !important;
+    }
+    
+    .chakra-form__label {
+      margin-bottom: 2px !important;
+    }
+  }
+`;
 
 export default function RegistrationForm() {
     const router = useRouter();
@@ -177,7 +208,6 @@ export default function RegistrationForm() {
         setError(null);
         const { formData } = data;
 
-        // Combine address fields
         if (formData.address) {
             const { street, city, province } = formData.address;
             formData.address = `${street}, ${city}, ${province}`;
@@ -240,40 +270,42 @@ export default function RegistrationForm() {
                     <Heading
                         textAlign={"center"}
                         my={2}
-                        size="lg"
+                        size="md"
                         textColor={"blue.600"}
                     >
-                        Advanced Integrated SCM
+                    Advanced Integrated SCM
                     </Heading>
                     <Heading
                         textAlign={"center"}
                         my={4}
-                        size="md"
+                        size="sm"
                         textColor={"blue.600"}
                     >
                         Register
                     </Heading>
                     {error && <Text color="red.500">{error}</Text>}
-                    <Form
-                        schema={schema}
-                        uiSchema={uiSchema}
-                        onSubmit={onSubmit}
-                        validator={validator}
-                    >
-                        <Button
-                            colorScheme='blue'
-                            type='submit'
-                            isLoading={loading}
-                            width="full"
-                            borderRadius={8}
+                    <FormStyles>
+                        <Form
+                            schema={schema}
+                            uiSchema={uiSchema}
+                            onSubmit={onSubmit}
+                            validator={validator}
                         >
-                            Register
-                        </Button>
-                    </Form>
+                            <Button
+                                colorScheme='blue'
+                                type='submit'
+                                isLoading={loading}
+                                width="full"
+                                borderRadius={8}
+                            >
+                                Register
+                            </Button>
+                        </Form>
+                    </FormStyles>
                     <Text textAlign="center" mt={2}>
                         Already have an account ? {" "}
                         <Link href="/auth/signin">
-                            <BlueLink>Login</BlueLink>
+                            Login
                         </Link>
                     </Text>
                 </Box>

@@ -28,6 +28,10 @@ const uiSchema = {
     id: {
         "ui:widget": "hidden"
     },
+    taxClearance: {
+        "ui:placeholder": "Upload document",
+        "ui:label": false
+    },
     taxExpiry: {
         "ui:widget": "date"
     }
@@ -105,17 +109,17 @@ const SupplierForm: React.FC<SupplierFormProps> = ({ initialData }) => {
                 onSubmit={handleSubmit}
                 validator={validator}            >
                 <HStack mt={4} spacing={8}>
-                    <Button 
-                        type="submit" 
+                    <Button
+                        type="submit"
                         colorScheme="blue"
                         isLoading={isLoading}
                         loadingText="Submitting"
                     >
                         Submit
                     </Button>
-                    <Button 
-                        colorScheme="red" 
-                        onClick={handleCancel} 
+                    <Button
+                        colorScheme="red"
+                        onClick={handleCancel}
                         aria-label="Cancel action"
                         isDisabled={isLoading}
                     >

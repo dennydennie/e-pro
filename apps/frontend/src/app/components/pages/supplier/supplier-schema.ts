@@ -17,7 +17,11 @@ export const supplierSchema = {
             maximum: 180 
         },
         contactNumber: { type: "string", title: "Contact Number", minLength: 1, maxLength: 40 },
-        taxClearance: { type: "string", title: "Tax Clearance", minLength: 1 },
+        taxClearance: { 
+            type: "string", 
+            title: "Tax Clearance Document", 
+            format: "data-url" 
+        },
         taxExpiry: { 
             type: "string", 
             title: "Tax Expiry Date", 

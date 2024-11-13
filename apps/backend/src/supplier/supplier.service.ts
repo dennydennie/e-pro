@@ -10,9 +10,10 @@ export class SupplierService {
   constructor(
     private supplierRepository: SupplierRepository,
   ) {}
-
   async create(createSupplierDto: CreateSupplierDto): Promise<SupplierEntity> {
-    const supplier = this.supplierRepository.create(createSupplierDto);
+    const supplier = this.supplierRepository.create({
+      ...createSupplierDto,
+    });
     return await this.supplierRepository.save(supplier);
   }
 

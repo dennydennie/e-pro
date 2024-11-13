@@ -152,8 +152,8 @@ export default function LoginForm() {
                         </Button>
                     </Form>
                     <Text textAlign="center" mt={4}>
-                        Need an account ? {" "} <Link href="/auth/register" color="blue">
-                            <BlueLink>Register</BlueLink>
+                        Need an account ? {" "} <Link href="/auth/register" color="blue.600">
+                            Register
                         </Link>
                     </Text>
                 </Box>

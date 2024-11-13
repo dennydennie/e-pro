@@ -25,11 +25,13 @@ import {
     Textarea,
     Select,
     useToast,
+    IconButton,
 } from '@chakra-ui/react';
 import { useRouter } from 'next/navigation';
 import makeRequest from '@/app/services/backend';
-import { StarIcon } from '@chakra-ui/icons';
+import { AddIcon, StarIcon, DownloadIcon } from '@chakra-ui/icons';
 import { Supplier } from './SupplierListComponent';
+import { saveAs } from 'file-saver';
 
 export interface Review {
     id: string;
@@ -79,14 +81,14 @@ function SupplierViewComponent({ supplierId }: { supplierId: string }) {
         };
 
         fetchSupplier();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     React.useEffect(() => {
         const fetchReviews = async () => {
             setIsLoadingReviews(true);
             try {
-                const response = await makeRequest<Review[]>('GET', `/review/${supplierId}`);
+                const response = await makeRequest<Review[]>('GET', `/review/supplier/${supplierId}`);
                 if (response.data) {
                     setReviews(response.data);
                 } else {
@@ -143,10 +145,10 @@ function SupplierViewComponent({ supplierId }: { supplierId: string }) {
             };
 
             await makeRequest('POST', `/review`, newReview);
-            
-            const updatedReviews = (await makeRequest<Review[]>('GET', `/review/${supplierId}`)).data;
+
+            const updatedReviews = (await makeRequest<Review[]>('GET', `/review/supplier/${supplierId}`)).data;
             setReviews(updatedReviews);
-            
+
             setDescription('');
             setRating(5);
             onClose();
@@ -157,7 +159,7 @@ function SupplierViewComponent({ supplierId }: { supplierId: string }) {
                 duration: 3000,
                 isClosable: true,
             });
-        } catch (err) {
+        } catch (err: any) {
             console.error('Error submitting review:', err);
             toast({
                 title: `Error submitting review, please try again. ${err.message}`,
@@ -194,6 +196,28 @@ function SupplierViewComponent({ supplierId }: { supplierId: string }) {
         </HStack>
     );
 
+    const handleDownloadTaxClearance = async () => {
+        try {
+            const response = await makeRequest<Blob>('GET', `/supplier/${supplierId}/tax-clearance`, null, {
+                responseType: 'blob'
+            });
+            if (response.data) {
+                const fileName = supplier?.taxClearance.split('/').pop() || 'tax-clearance.pdf';
+                saveAs(response.data, fileName);
+            } else {
+                console.error('No data received for tax clearance download.');
+                toast({
+                    title: 'Error downloading document',
+                    status: 'error',
+                    duration: 3000,
+                    isClosable: true,
+                });
+            }
+        }
+        catch (err) {
+            console.error('Error downloading tax clearance:', err);
+        }
+    }
     return (
         <ChakraProvider theme={theme}>
             <Box p={4}>
@@ -207,26 +231,33 @@ function SupplierViewComponent({ supplierId }: { supplierId: string }) {
                     <Text>Loading supplier details...</Text>
                 ) : supplier ? (
                     <VStack spacing={4} align='start'>
+                        <Heading size="lg">Supplier Details</Heading>
                         <Heading fontSize={'2xl'} my={4}>{supplier.name}</Heading>
                         <Divider />
-                        
+
                         <Text><strong>Contact Number:</strong> {supplier.contactNumber}</Text>
                         <Text><strong>Address:</strong> {supplier.address}</Text>
                         <Text>
                             <strong>Location Coordinates:</strong> {supplier.lat}, {supplier.lon}
                         </Text>
-                        
+
                         <Box>
                             <Text><strong>PRAZ Number:</strong> {supplier.prazNumber}</Text>
                             <Text><strong>VAT Number:</strong> {supplier.vatNumber}</Text>
                         </Box>
-                        
+
                         <Box>
                             <Text>
-                                <strong>Tax Clearance:</strong> {supplier.taxClearance}
-                                <Button size="sm" ml={2} colorScheme="blue" variant="outline">
-                                    View Document
-                                </Button>
+                                <strong>Tax Clearance:</strong>
+                                <IconButton
+                                    size="sm"
+                                    ml={2}
+                                    colorScheme="blue"
+                                    variant="outline"
+                                    onClick={handleDownloadTaxClearance}
+                                    icon={<DownloadIcon />}
+                                    arial-label="download"
+                                />
                             </Text>
                             <HStack>
                                 <Text><strong>Tax Expiry:</strong> {new Date(supplier.taxExpiry).toLocaleDateString()}</Text>
@@ -238,19 +269,17 @@ function SupplierViewComponent({ supplierId }: { supplierId: string }) {
 
                         <Box w="100%">
                             <Heading size="md" mb={2}>Reviews</Heading>
-                            <Button colorScheme="green" onClick={onOpen} mb={4}>
-                                Add Review
-                            </Button>
-                            
+                            <IconButton icon={<AddIcon />} colorScheme="green" onClick={onOpen} mb={4} aria-label="Add review" />
+
                             {isLoadingReviews ? (
                                 <Text>Loading reviews...</Text>
                             ) : (
                                 <VStack spacing={4} align="stretch">
                                     {reviews.map((review) => (
-                                        <Box 
-                                            key={review.id} 
-                                            p={4} 
-                                            borderWidth={1} 
+                                        <Box
+                                            key={review.id}
+                                            p={4}
+                                            borderWidth={1}
                                             borderRadius="md"
                                             bg="white"
                                         >
@@ -269,8 +298,8 @@ function SupplierViewComponent({ supplierId }: { supplierId: string }) {
 
                         <HStack spacing={4}>
                             <Button colorScheme="blue" onClick={handleEdit}>Edit</Button>
-                            <Button 
-                                colorScheme="red" 
+                            <Button
+                                colorScheme="red"
                                 onClick={handleDelete}
                                 isLoading={isDeleting}
                                 loadingText="Deleting..."
@@ -289,8 +318,8 @@ function SupplierViewComponent({ supplierId }: { supplierId: string }) {
                         <ModalBody>
                             <FormControl mb={4}>
                                 <FormLabel>Rating</FormLabel>
-                                <Select 
-                                    value={rating} 
+                                <Select
+                                    value={rating}
                                     onChange={(e) => setRating(Number(e.target.value))}
                                 >
                                     <option value={5}>5 - Excellent</option>
@@ -311,9 +340,9 @@ function SupplierViewComponent({ supplierId }: { supplierId: string }) {
                         </ModalBody>
 
                         <ModalFooter>
-                            <Button 
-                                colorScheme="blue" 
-                                mr={3} 
+                            <Button
+                                colorScheme="blue"
+                                mr={3}
                                 onClick={handleSubmitReview}
                                 isLoading={isSubmittingReview}
                                 loadingText="Submitting..."

@@ -21,7 +21,7 @@ export class SupplierEntity extends AbstractEntity {
   @Column()
   contactNumber: string;
 
-  @Column()
+  @Column({nullable:true})
   taxClearance: string;
 
   @Column({ type: 'date' })

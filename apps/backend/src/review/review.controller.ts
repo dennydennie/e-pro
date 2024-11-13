@@ -43,6 +43,21 @@ export class ReviewController {
     return this.reviewService.findAll();
   }
 
+  @Get('supplier/:supplierId')
+  @ApiOperation({ summary: 'Get all reviews for a specific supplier' })
+  @ApiParam({ name: 'supplierId', description: 'Supplier UUID' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns all reviews for the specified supplier',
+    type: [ReviewEntity],
+  })
+  @ApiResponse({ status: 404, description: 'Supplier not found.' })
+  findBySupplier(
+    @Param('supplierId', ParseUUIDPipe) supplierId: string,
+  ): Promise<ReviewEntity[]> {
+    return this.reviewService.findBySupplier(supplierId);
+  }
+
   @Get(':id')
   @ApiOperation({ summary: 'Get a review by id' })
   @ApiParam({ name: 'id', description: 'Review UUID' })

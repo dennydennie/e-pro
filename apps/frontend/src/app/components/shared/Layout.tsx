@@ -83,7 +83,7 @@ const Navbar = ({ user }:{ user: User}) => {
                 w="100%" 
                 bg="blue.600" 
                 px={4} 
-                h="70px" 
+                h="60px" 
                 zIndex="1000" 
                 boxShadow="md" 
                 alignItems="center"
@@ -127,8 +127,8 @@ const Navbar = ({ user }:{ user: User}) => {
                 id="side-menu"
                 position="fixed"
                 left={0}
-                top="70px"
-                h="calc(100vh - 70px)"
+                top="60px"
+                h="calc(100vh - 60px)"
                 w="250px"
                 bg="blue.600"
                 transform={isOpen ? "translateX(0)" : "translateX(-100%)"}
@@ -144,12 +144,13 @@ const Navbar = ({ user }:{ user: User}) => {
                                 alignItems="center"
                                 bg={router.pathname.includes(link.basePath) ? 'blue.700' : 'transparent'}
                                 color="white"
-                                p={2}
+                                p={1.5}
                                 borderRadius="md"
                                 _hover={{ 
-                                    bg: 'blue.500',
+                                    bg: 'white',
                                     transform: 'translateX(5px)',
-                                    transition: 'all 0.2s'
+                                    transition: 'all 0.2s',
+                                    color: 'blue.500'
                                 }}
                                 transition="all 0.2s"
                             >

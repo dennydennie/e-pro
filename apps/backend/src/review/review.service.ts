@@ -90,4 +90,19 @@ export class ReviewService {
       throw new NotFoundException(`Review with ID ${id} not found`);
     }
   }
+
+  async findBySupplier(supplierId: string): Promise<ReviewEntity[]> {
+    const supplier = await this.supplierRepository.findOne({
+      where: { id: supplierId },
+    });
+
+    if (!supplier) {
+      throw new NotFoundException(`Supplier with ID ${supplierId} not found`);
+    }
+
+    return this.reviewRepository.find({
+      where: { supplier: { id: supplierId } },
+      relations: ['supplier'],
+    });
+  }
 }
